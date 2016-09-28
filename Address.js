@@ -24,7 +24,9 @@ exports.handler = function(event, context, callback) {
             deleteAddress(event, callback);
             break;
         default:
-            callback(new Error('Unrecognized operation "${event.operation}"'));
+            var err = new Error('Unrecognized operation "${event.operation}"');
+            err.name = '405';
+            callback(err, null);
     }
 };
 
@@ -42,8 +44,15 @@ function getAddress(event, callback) {
            console.log('getAddress err: ' + JSON.stringify(err));
            callback(err, null);
        } else {
-           console.log('getAddress success, data: ' + JSON.stringify(data));
-           callback(null, data);
+           if (JSON.stringify(data).length === 0) {
+               err = new Error ('key not found in the table');
+               err.name = '404';
+               callback(err, null);
+           }
+           else{
+               console.log('getAddress success, data: ' + JSON.stringify(data));
+               callback(null, data);
+           }
        }
     });
 }
@@ -51,20 +60,46 @@ function getAddress(event, callback) {
 function validateAddress(item, create) {
     // TODO: Check duplicate item
     if (create) {
-        if (hasAllAttributes(item)) return 'newAddress does not have enough attributes';
+        if (hasAllAttributes(item)) {
+            var err = new Error('newAddress does not have enough attributes');
+            err.name = '400';
+            return err;
+        }
     } 
     for (var col in item) {
         switch (col) {
             case ('city'):
+                if (typeof item.city != 'string') {
+                    err = new Error('wrong type! city has to be a Js string type');
+                    err.name = '400';
+                    return err;
+                }
                 break;
             case ('street'):
+                if (typeof item.street != 'string') { 
+                    err = new Error('wrong type! street has to be a Js string type');
+                    err.name = '400';
+                    return err;
+                }
                 break;
             case ('number'):
-                if (typeof item.number != 'number') return 'wrong type! number has to be a Js number type';
+                if (typeof item.number != 'number') {
+                    err = new Error('wrong type! number has to be a Js number type');
+                    err.name = '400';
+                    return err;
+                }
                 break;
             case ('zip'):
-                if (typeof item.zip != 'number') return 'wrong type! zip code has to be a Js number type'; 
-                if (item.zip.toString().length != 5) return 'zip code has to be 5 digit long';
+                if (typeof item.zip != 'string') {
+                    err = new Error('wrong type! zip code has to be a Js string type'); 
+                    err.name = '400';
+                    return err;
+                }
+                if (item.zip.length != 5) {
+                    err = new Error('zip code has to be 5 digits long');
+                    err.name = '400';
+                    return err;
+                }
                 break;
             default:
                 return 'new address can not have colmun other than city, street, number and zip';
