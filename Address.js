@@ -124,15 +124,29 @@ function createAddress(event, callback) {
     }
 }
 
-function updateExpression(updates) {
+function updateExpression(updates, params) {
     var expr = "SET";
+    var exprAttrName = {};
+    var exprAttrVal = {};
 
     for (var key in updates) {
-        expr += " " + key + " = " + updates[key];
+        var attrKey = "#" + key;
+        var attrVal = ":" + key;
+        expr += " " + attrKey + " = " + attrVal + ",";
+        exprAttrName[attrKey] = key;
+        exprAttrVal[attrVal] = updates[key];
     }
-    console.log("UpdateExpression: " + JSON.stringify(expr));
+    expr = expr.slice(0, -1);
 
-    return expr;
+    console.log("Translated expr in updateExpression: " + expr);
+    console.log("Translated exprAttrName in updateExpression: " + JSON.stringify(exprAttrName));
+    console.log("Translated exprAttrVal in updateExpression: " + JSON.stringify(exprAttrVal));
+
+    params.UpdateExpression = expr;
+    params.ExpressionAttributeNames = exprAttrName;
+    params.ExpressionAttributeValues = exprAttrVal;
+
+    return params;
 }
 
 function hasAllAttributes(item) {
@@ -148,7 +162,9 @@ function updateAddress(event, callback) {
     var params = {
         TableName: 'Address',
         Key: {'UUID': event.UUID},
-        UpdateExpression: ''
+        UpdateExpression: "",
+        ExpressionAttributeNames: {},
+        ExpressionAttributeValues: {}
     };
 
     console.log('In updateAddress, params is: ' + JSON.stringify(params));
@@ -159,7 +175,7 @@ function updateAddress(event, callback) {
         console.log('validateAddress() returns err: ' + JSON.stringify(err));
         callback(err, null);
     } else {
-        params.UpdateExpression = updateExpression(event.updates);
+        params = updateExpression(event.updates, params);
         dynamo.updateItem(params, function(err, data) {
             if (err) {
                 console.log('updateAddress err: ' + JSON.stringify(err));
