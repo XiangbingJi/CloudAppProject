@@ -31,7 +31,7 @@ exports.handler = function(event, context, callback) {
 function getAddress(event, callback) {
     
     var params = {
-        TableName: 'Address',
+        TableName: event.tableName,
         Key: {'UUID': event.UUID}
     };
     
@@ -92,7 +92,7 @@ function genAddressID(item) {
 
 function createAddress(event, callback) {
     var params = {
-        TableName: 'Address',
+        TableName: event.tableName,
         Item: event.item,
         ConditionExpression: ''
     };
@@ -160,7 +160,7 @@ function hasAllAttributes(item) {
 
 function updateAddress(event, callback) {
     var params = {
-        TableName: 'Address',
+        TableName: event.tableName,
         Key: {'UUID': event.UUID},
         UpdateExpression: "",
         ExpressionAttributeNames: {},
@@ -190,7 +190,7 @@ function updateAddress(event, callback) {
 
 function deleteAddress(event, callback) {
     var params = {
-        TableName: 'Address',
+        TableName: event.tableName,
         Key: {'UUID': event.UUID}
     };
     
