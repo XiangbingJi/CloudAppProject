@@ -48,6 +48,15 @@ function getAddress(event, callback) {
     });
 }
 
+function hasAllAttributes(item) {
+    // check whether the new Address has all four attributes city, number, street and zip
+    var obj = {'city': false, 'number': false, 'street': false, 'zip' : false};
+    for (var key in item) {
+        if (key in obj) obj.key = true;
+    }
+    return obj.city && obj.number && obj.street && obj.zip;
+}
+
 function validateAddress(item, create) {
     // TODO: Check duplicate item
     if (create) {
@@ -147,15 +156,6 @@ function updateExpression(updates, params) {
     params.ExpressionAttributeValues = exprAttrVal;
 
     return params;
-}
-
-function hasAllAttributes(item) {
-    // check whether the new Address has all four attributes city, number, street and zip
-    var obj = {'city': false, 'number': false, 'street': false, 'zip' : false};
-    for (var key in item) {
-        if (key in obj) obj.key = true;
-    }
-    return obj.city && obj.number && obj.street && obj.zip;
 }
 
 function updateAddress(event, callback) {
