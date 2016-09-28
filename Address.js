@@ -43,16 +43,14 @@ function getAddress(event, callback) {
        if (err) {
            console.log('getAddress err: ' + JSON.stringify(err));
            callback(err, null);
-       } else {
-           if (JSON.stringify(data).length === 0) {
-               err = new Error ('key not found in the table');
-               err.name = '404';
-               callback(err, null);
-           }
-           else{
-               console.log('getAddress success, data: ' + JSON.stringify(data));
-               callback(null, data);
-           }
+       } else if (JSON.stringify(data).length === 0) {
+           err = new Error ('key not found in the table');
+           err.name = '404';
+           callback(err, null);
+       }
+       else{
+           console.log('getAddress success, data: ' + JSON.stringify(data));
+           callback(null, data);
        }
     });
 }
