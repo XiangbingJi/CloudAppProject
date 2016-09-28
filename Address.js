@@ -33,7 +33,7 @@ exports.handler = function(event, context, callback) {
 function getAddress(event, callback) {
     
     var params = {
-        TableName: 'Address',
+        TableName: event.tableName,
         Key: {'UUID': event.UUID}
     };
     
@@ -55,6 +55,15 @@ function getAddress(event, callback) {
            }
        }
     });
+}
+
+function hasAllAttributes(item) {
+    // check whether the new Address has all four attributes city, number, street and zip
+    var obj = {'city': false, 'number': false, 'street': false, 'zip' : false};
+    for (var key in item) {
+        if (key in obj) obj.key = true;
+    }
+    return obj.city && obj.number && obj.street && obj.zip;
 }
 
 function validateAddress(item, create) {
@@ -127,7 +136,7 @@ function genAddressID(item) {
 
 function createAddress(event, callback) {
     var params = {
-        TableName: 'Address',
+        TableName: event.tableName,
         Item: event.item,
         ConditionExpression: ''
     };
@@ -184,18 +193,9 @@ function updateExpression(updates, params) {
     return params;
 }
 
-function hasAllAttributes(item) {
-    // check whether the new Address has all four attributes city, number, street and zip
-    var obj = {'city': false, 'number': false, 'street': false, 'zip' : false};
-    for (var key in item) {
-        if (key in obj) obj.key = true;
-    }
-    return obj.city && obj.number && obj.street && obj.zip;
-}
-
 function updateAddress(event, callback) {
     var params = {
-        TableName: 'Address',
+        TableName: event.tableName,
         Key: {'UUID': event.UUID},
         UpdateExpression: "",
         ExpressionAttributeNames: {},
@@ -225,7 +225,7 @@ function updateAddress(event, callback) {
 
 function deleteAddress(event, callback) {
     var params = {
-        TableName: 'Address',
+        TableName: event.tableName,
         Key: {'UUID': event.UUID}
     };
     
