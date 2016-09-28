@@ -14,9 +14,6 @@ exports.handler = function(event, context, callback) {
         case ('read'):
             getAddress(event, callback);
             break;
-        case ('find'):
-            findAddress(event, callback);
-            break;
         case ('create'):
             createAddress(event, callback);
             break;
@@ -63,14 +60,17 @@ function validateAddress(item, create) {
             case ('street'):
                 break;
             case ('number'):
-                if (typeof item.number != 'number') return'wrong type! number has to be a number';
+                if (typeof item.number != 'number') return 'wrong type! number has to be a Js number type';
+                break;
             case ('zip'):
-                if (typeof item.zip != number) return 'wrong type! zip code has to be a number';
-                if (item.zip.toString.length != 5) return'zip code has to be 5 digit long';
+                if (typeof item.zip != 'number') return 'wrong type! zip code has to be a Js number type'; 
+                if (item.zip.toString().length != 5) return 'zip code has to be 5 digit long';
+                break;
             default:
                 return 'new address can not have colmun other than city, street, number and zip';
+        }
     }
-    return null
+    return null;
 }
 
 function hashString(s) {
@@ -94,7 +94,7 @@ function createAddress(event, callback) {
     var params = {
         TableName: 'Address',
         Item: event.item,
-        ConditionExpression: 
+        ConditionExpression: ''
     };
 
     console.log('In createAddress, params is: ' + JSON.stringify(params));
@@ -105,10 +105,15 @@ function createAddress(event, callback) {
         callback(err, null);
     } else {
         params.Item.UUID = genAddressID(params.Item);
-        params.ConditionExpression = attribute_not_exists(params.Item.UUID);
+        params.ConditionExpression = 'attribute_not_exists(#myid)';
+        params.ExpressionAttributeNames = {
+            "#myid": "UUID"
+        };
+
         // TODO: Prevent overwriting by condition expressions
         dynamo.putItem(params, function(err, data) {
             if (err) {
+                // TODO check errtype == 'ConditionalCheckFailedException'
                 console.log('createAddress err: ' + JSON.stringify(err));
                 callback(err, null);
             } else {
@@ -132,7 +137,7 @@ function updateExpression(updates) {
 
 function hasAllAttributes(item) {
     // check whether the new Address has all four attributes city, number, street and zip
-    obj = {city: false, number: false, street, false, zip : false};
+    var obj = {'city': false, 'number': false, 'street': false, 'zip' : false};
     for (var key in item) {
         if (key in obj) obj.key = true;
     }
@@ -143,7 +148,7 @@ function updateAddress(event, callback) {
     var params = {
         TableName: 'Address',
         Key: {'UUID': event.UUID},
-        UpdateExpression:
+        UpdateExpression: ''
     };
 
     console.log('In updateAddress, params is: ' + JSON.stringify(params));
