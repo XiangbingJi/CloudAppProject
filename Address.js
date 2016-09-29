@@ -150,8 +150,12 @@ function createAddress(event, callback) {
     } else {
         params.Item.UUID = genAddressID(params.Item); 
         dynamo.putItem(params, function(err, data) {
-            if (err) {
-                // TODO check errtype == 'ConditionalCheckFailedException'
+            if (err && err.code == "ConditionalCheckFailedException") {
+                err = new Error('403 This address is already in the table');
+                err.name = "Permission denied";
+                console.log('createAddress err: ' + JSON.stringify(err));
+                callback(err, null);
+            } else if (err) {
                 console.log('createAddress err: ' + JSON.stringify(err));
                 callback(err, null);
             } else {
@@ -204,10 +208,14 @@ function updateAddress(event, callback) {
     } else {
         params = updateExpression(event.updates, params);
         dynamo.updateItem(params, function(err, data) {
-            if (err) {
+            if (err && err.code == "ConditionalCheckFailedException") {
+                err = new Error('403 Updating address is not found in the table');
+                err.name = "Permission denied";
                 console.log('updateAddress err: ' + JSON.stringify(err));
                 callback(err, null);
-                // TODO check errtype == 'ConditionalCheckFailedException'
+            } else if (err) {
+                console.log('updateAddress err: ' + JSON.stringify(err));
+                callback(err, null);
             } else {
                 console.log('updateAddress success, data: ' + JSON.stringify(data));
                 callback(null, data);
@@ -227,7 +235,12 @@ function deleteAddress(event, callback) {
     console.log('In deleteAddress, params is: ' + JSON.stringify(params));
     
     dynamo.deleteItem(params, function(err, data) {
-        if (err) {
+        if (err && err.code == "ConditionalCheckFailedException") {
+            err = new Error('403 Deleting address is not found in the table');
+            err.name = "Permission denied";
+            console.log('deleteAddress err: ' + JSON.stringify(err));
+            callback(err, null);
+        } else if (err) {
             console.log('deleteAddress err: ' + JSON.stringify(err));
             callback(err, null);
         } else {
