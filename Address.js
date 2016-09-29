@@ -102,6 +102,7 @@ function validateAddress(item, create) {
                     err.name = '400';
                     return err;
                 }
+                // TODO: Check it's a 5-digit number
                 if (item.zip.length != 5) {
                     err = new Error('zip code has to be 5 digits long');
                     err.name = '400';
@@ -136,7 +137,8 @@ function createAddress(event, callback) {
     var params = {
         TableName: event.tableName,
         Item: event.item,
-        ConditionExpression: ''
+        ConditionExpression: "attribute_not_exists(#myid)",
+        ExpressionAttributeNames: {"#myid": "UUID"}
     };
 
     console.log('In createAddress, params is: ' + JSON.stringify(params));
@@ -146,13 +148,7 @@ function createAddress(event, callback) {
         console.log('validateAddress() returns err: ' + JSON.stringify(err));
         callback(err, null);
     } else {
-        params.Item.UUID = genAddressID(params.Item);
-        params.ConditionExpression = 'attribute_not_exists(#myid)';
-        params.ExpressionAttributeNames = {
-            "#myid": "UUID"
-        };
-
-        // TODO: Prevent overwriting by condition expressions
+        params.Item.UUID = genAddressID(params.Item); 
         dynamo.putItem(params, function(err, data) {
             if (err) {
                 // TODO check errtype == 'ConditionalCheckFailedException'
@@ -167,9 +163,9 @@ function createAddress(event, callback) {
 }
 
 function updateExpression(updates, params) {
-    var expr = "SET";
-    var exprAttrName = {};
-    var exprAttrVal = {};
+    var expr = " SET";
+    var exprAttrName = params.ExpressionAttributeNames;
+    var exprAttrVal = params.ExpressionAttributeValues;
 
     for (var key in updates) {
         var attrKey = "#" + key;
@@ -184,9 +180,7 @@ function updateExpression(updates, params) {
     console.log("Translated exprAttrName in updateExpression: " + JSON.stringify(exprAttrName));
     console.log("Translated exprAttrVal in updateExpression: " + JSON.stringify(exprAttrVal));
 
-    params.UpdateExpression = expr;
-    params.ExpressionAttributeNames = exprAttrName;
-    params.ExpressionAttributeValues = exprAttrVal;
+    params.UpdateExpression += expr;
 
     return params;
 }
@@ -195,14 +189,14 @@ function updateAddress(event, callback) {
     var params = {
         TableName: event.tableName,
         Key: {'UUID': event.UUID},
+        ConditionExpression: "attribute_exists(#myid)",
         UpdateExpression: "",
-        ExpressionAttributeNames: {},
+        ExpressionAttributeNames: {"#myid": "UUID"},
         ExpressionAttributeValues: {}
     };
 
     console.log('In updateAddress, params is: ' + JSON.stringify(params));
     
-    // TODO: Add condition expression 
     var err = validateAddress(event.updates, false);
     if (err) {
         console.log('validateAddress() returns err: ' + JSON.stringify(err));
@@ -211,6 +205,7 @@ function updateAddress(event, callback) {
         params = updateExpression(event.updates, params);
         dynamo.updateItem(params, function(err, data) {
             if (err) {
+                // TODO check errtype == 'ConditionalCheckFailedException'
                 console.log('updateAddress err: ' + JSON.stringify(err));
                 callback(err, null);
             } else {
