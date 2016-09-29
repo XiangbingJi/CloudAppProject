@@ -157,10 +157,14 @@ function createCustomer(event, callback) {
         callback(err, null);
     } else {
         dynamo.putItem(params, function(err, data) {
-            if (err) {
+            if (err && err.code == "ConditionalCheckFailedException") {
+                err = new Error('403 The email is already in table');
+                err.name = "Permission denied";
                 console.log('createCustomer err: ' + JSON.stringify(err));
                 callback(err, null);
-                // TODO check errtype == 'ConditionalCheckFailedException'
+            } else if (err) {
+                console.log('createCustomer err: ' + JSON.stringify(err));
+                callback(err, null);
             } else {
                 console.log('createCustomer success, data: ' + JSON.stringify(data));
                 callback(null, data);
@@ -211,10 +215,14 @@ function updateCustomer(event, callback) {
     } else {
         params = updateExpression(event.updates, params);
         dynamo.updateItem(params, function(err, data) {
-            if (err) {
+            if (err && err.code == "ConditionalCheckFailedException") {
+                err = new Error('403 Updating customer is not found in the table');
+                err.name = "Permission denied";
                 console.log('updateCustomer err: ' + JSON.stringify(err));
                 callback(err, null);
-                // TODO check errtype == 'ConditionalCheckFailedException'
+            } else if (err) {
+                console.log('updateCustomer err: ' + JSON.stringify(err));
+                callback(err, null);
             } else {
                 console.log('updateCustomer success, data: ' + JSON.stringify(data));
                 callback(null, data);
@@ -240,7 +248,12 @@ function deleteCustomer(event, callback) {
         callback(errEmail, null);
     } else {
         dynamo.deleteItem(params, function(err, data) {
-            if (err) {
+            if (err && err.code == "ConditionalCheckFailedException") {
+                err = new Error('403 Deleting customer is not found in the table');
+                err.name = "Permission denied";
+                console.log('deleteCustomer err: ' + JSON.stringify(err));
+                callback(err, null);
+            } else if (err) {
                 console.log('deleteCustomer err: ' + JSON.stringify(err));
                 callback(err, null);
             } else {
