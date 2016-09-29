@@ -4,6 +4,22 @@ console.log('Loading Address.js...');
 const doc = require('dynamodb-doc');
 const dynamo = new doc.DynamoDB();
 
+function generateUUID() {
+	var totalCharacters = 39; // length of number hash; in this case 0-39 = 40 characters
+	var txtUuid = "";
+	do {
+		var point = Math.floor(Math.random() * 10);
+		if (txtUuid.length === 0 && point === 0) {
+			do {
+				point = Math.floor(Math.random() * 10);
+			} while (point === 0);
+		}
+		txtUuid = txtUuid + point;
+	} while ((txtUuid.length - 1) < totalCharacters);
+	return txtUuid;
+}
+
+
 exports.handler = function(event, context, callback) {
     console.log('handler event: ' + JSON.stringify(event));
     console.log('handler context: ' + JSON.stringify(context));
@@ -116,23 +132,6 @@ function validateAddress(item, create) {
     return null;
 }
 
-function hashString(s) {
-    // NOTE: This hash generates a signed int
-    // Borrowed from a post on StackOverflow
-    var hash = 0, i, chr, len;
-    if (s.length === 0) return hash;
-    for (i = 0, len = s.length; i < len; i++) {
-        chr   = s.charCodeAt(i);
-        hash  = ((hash << 5) - hash) + chr;
-        hash |= 0; // Convert to 32bit integer
-    }
-    return hash.toString();
-}
-
-function genAddressID(item) {
-    return hashString(item.city + item.street + item.number + item.zipcode);
-}
-
 function createAddress(event, callback) {
     var params = {
         TableName: event.tableName,
@@ -148,7 +147,7 @@ function createAddress(event, callback) {
         console.log('validateAddress() returns err: ' + JSON.stringify(err));
         callback(err, null);
     } else {
-        params.Item.UUID = genAddressID(params.Item); 
+        params.Item.UUID = generateUUID(); 
         dynamo.putItem(params, function(err, data) {
             if (err && err.code == "ConditionalCheckFailedException") {
                 err = new Error('403 This address is already in the table');
