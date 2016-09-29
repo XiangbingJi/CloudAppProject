@@ -4,6 +4,22 @@ console.log('Loading Address.js...');
 const doc = require('dynamodb-doc');
 const dynamo = new doc.DynamoDB();
 
+function generateUUID() {
+	var totalCharacters = 39; // length of number hash; in this case 0-39 = 40 characters
+	var txtUuid = "";
+	do {
+		var point = Math.floor(Math.random() * 10);
+		if (txtUuid.length === 0 && point === 0) {
+			do {
+				point = Math.floor(Math.random() * 10);
+			} while (point === 0);
+		}
+		txtUuid = txtUuid + point;
+	} while ((txtUuid.length - 1) < totalCharacters);
+	return txtUuid;
+}
+
+
 exports.handler = function(event, context, callback) {
     console.log('handler event: ' + JSON.stringify(event));
     console.log('handler context: ' + JSON.stringify(context));
@@ -90,47 +106,37 @@ function validateAddress(item, create) {
                 }
                 break;
             case ('number'):
-                if (typeof item.number != 'number') {
-                    err = new Error('400 wrong type! number has to be a Js number type');
+                if (typeof item.number != 'string') {
+                    err = new Error('400 wrong type! number has to be a Js string type');
                     err.name = '400';
                     return err;
+                } else {
+                    var isNum = /^\d+$/.test(item.number);
+                    if(!isNum){
+                        err = new Error('400 wrong type! street number has to be number');
+                        err.name = '400';
+                        return err;
+                    }
                 }
                 break;
-            case ('zip'):
-                if (typeof item.zip != 'string') {
+            case ('zipcode'):
+                if (typeof item.zipcode != 'string') {
                     err = new Error('400 wrong type! zip code has to be a Js string type'); 
                     err.name = '400';
                     return err;
                 }
                 var re = /\d{5}/;
-                if (!re.test(item.zip)) {
+                if (!re.test(item.zipcode)) {
                     err = new Error('400 zip code has to be a 5-digits number');
                     err.name = '400';
                     return err;
                 }
                 break;
             default:
-                return new Error('400 new address can not have colmun other than city, street, number and zip');
+                return new Error('400 new address can not have colmun other than city, street, number and zipcode');
         }
     }
     return null;
-}
-
-function hashString(s) {
-    // NOTE: This hash generates a signed int
-    // Borrowed from a post on StackOverflow
-    var hash = 0, i, chr, len;
-    if (s.length === 0) return hash;
-    for (i = 0, len = s.length; i < len; i++) {
-        chr   = s.charCodeAt(i);
-        hash  = ((hash << 5) - hash) + chr;
-        hash |= 0; // Convert to 32bit integer
-    }
-    return hash.toString();
-}
-
-function genAddressID(item) {
-    return hashString(item.city + item.street + item.number + item.zipcode);
 }
 
 function createAddress(event, callback) {
@@ -148,7 +154,8 @@ function createAddress(event, callback) {
         console.log('validateAddress() returns err: ' + JSON.stringify(err));
         callback(err, null);
     } else {
-        params.Item.UUID = genAddressID(params.Item); 
+        var thisUUID = generateUUID();
+        params.Item.UUID = thisUUID; 
         dynamo.putItem(params, function(err, data) {
             if (err && err.code == "ConditionalCheckFailedException") {
                 err = new Error('403 This address is already in the table');
@@ -160,6 +167,7 @@ function createAddress(event, callback) {
                 callback(err, null);
             } else {
                 console.log('createAddress success, data: ' + JSON.stringify(data));
+                data['UUID'] = thisUUID;
                 callback(null, data);
             }
         });
