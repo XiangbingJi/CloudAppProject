@@ -24,7 +24,7 @@ exports.handler = function(event, context, callback) {
             deleteAddress(event, callback);
             break;
         default:
-            var err = new Error('Unrecognized operation "${event.operation}"');
+            var err = new Error('405 Unrecognized operation "${event.operation}"');
             err.name = '405';
             callback(err, null);
     }
@@ -43,16 +43,14 @@ function getAddress(event, callback) {
        if (err) {
            console.log('getAddress err: ' + JSON.stringify(err));
            callback(err, null);
-       } else {
-           if (JSON.stringify(data).length === 0) {
-               err = new Error ('key not found in the table');
-               err.name = '404';
-               callback(err, null);
-           }
-           else{
-               console.log('getAddress success, data: ' + JSON.stringify(data));
-               callback(null, data);
-           }
+       } else if (JSON.stringify(data).length === 0) {
+           err = new Error ('key not found in the table');
+           err.name = '404';
+           callback(err, null);
+       }
+       else{
+           console.log('getAddress success, data: ' + JSON.stringify(data));
+           callback(null, data);
        }
     });
 }
@@ -70,7 +68,7 @@ function validateAddress(item, create) {
     // TODO: Check duplicate item
     if (create) {
         if (hasAllAttributes(item)) {
-            var err = new Error('newAddress does not have enough attributes');
+            var err = new Error('400 newAddress does not have enough attributes');
             err.name = '400';
             return err;
         }
@@ -79,39 +77,40 @@ function validateAddress(item, create) {
         switch (col) {
             case ('city'):
                 if (typeof item.city != 'string') {
-                    err = new Error('wrong type! city has to be a Js string type');
+                    err = new Error('400 wrong type! city has to be a Js string type');
                     err.name = '400';
                     return err;
                 }
                 break;
             case ('street'):
                 if (typeof item.street != 'string') { 
-                    err = new Error('wrong type! street has to be a Js string type');
+                    err = new Error('400 wrong type! street has to be a Js string type');
                     err.name = '400';
                     return err;
                 }
                 break;
             case ('number'):
                 if (typeof item.number != 'number') {
-                    err = new Error('wrong type! number has to be a Js number type');
+                    err = new Error('400 wrong type! number has to be a Js number type');
                     err.name = '400';
                     return err;
                 }
                 break;
             case ('zip'):
                 if (typeof item.zip != 'string') {
-                    err = new Error('wrong type! zip code has to be a Js string type'); 
+                    err = new Error('400 wrong type! zip code has to be a Js string type'); 
                     err.name = '400';
                     return err;
                 }
-                if (item.zip.length != 5) {
-                    err = new Error('zip code has to be 5 digits long');
+                var re = /\d{5}/;
+                if (!re.test(item.zip)) {
+                    err = new Error('400 zip code has to be a 5-digits number');
                     err.name = '400';
                     return err;
                 }
                 break;
             default:
-                return 'new address can not have colmun other than city, street, number and zip';
+                return new Error('400 new address can not have colmun other than city, street, number and zip');
         }
     }
     return null;
@@ -138,7 +137,8 @@ function createAddress(event, callback) {
     var params = {
         TableName: event.tableName,
         Item: event.item,
-        ConditionExpression: ''
+        ConditionExpression: "attribute_not_exists(#myid)",
+        ExpressionAttributeNames: {"#myid": "UUID"}
     };
 
     console.log('In createAddress, params is: ' + JSON.stringify(params));
@@ -148,13 +148,7 @@ function createAddress(event, callback) {
         console.log('validateAddress() returns err: ' + JSON.stringify(err));
         callback(err, null);
     } else {
-        params.Item.UUID = genAddressID(params.Item);
-        params.ConditionExpression = 'attribute_not_exists(#myid)';
-        params.ExpressionAttributeNames = {
-            "#myid": "UUID"
-        };
-
-        // TODO: Prevent overwriting by condition expressions
+        params.Item.UUID = genAddressID(params.Item); 
         dynamo.putItem(params, function(err, data) {
             if (err) {
                 // TODO check errtype == 'ConditionalCheckFailedException'
@@ -169,9 +163,9 @@ function createAddress(event, callback) {
 }
 
 function updateExpression(updates, params) {
-    var expr = "SET";
-    var exprAttrName = {};
-    var exprAttrVal = {};
+    var expr = " SET";
+    var exprAttrName = params.ExpressionAttributeNames;
+    var exprAttrVal = params.ExpressionAttributeValues;
 
     for (var key in updates) {
         var attrKey = "#" + key;
@@ -186,9 +180,7 @@ function updateExpression(updates, params) {
     console.log("Translated exprAttrName in updateExpression: " + JSON.stringify(exprAttrName));
     console.log("Translated exprAttrVal in updateExpression: " + JSON.stringify(exprAttrVal));
 
-    params.UpdateExpression = expr;
-    params.ExpressionAttributeNames = exprAttrName;
-    params.ExpressionAttributeValues = exprAttrVal;
+    params.UpdateExpression += expr;
 
     return params;
 }
@@ -197,14 +189,14 @@ function updateAddress(event, callback) {
     var params = {
         TableName: event.tableName,
         Key: {'UUID': event.UUID},
+        ConditionExpression: "attribute_exists(#myid)",
         UpdateExpression: "",
-        ExpressionAttributeNames: {},
+        ExpressionAttributeNames: {"#myid": "UUID"},
         ExpressionAttributeValues: {}
     };
 
     console.log('In updateAddress, params is: ' + JSON.stringify(params));
     
-    // TODO: Add condition expression 
     var err = validateAddress(event.updates, false);
     if (err) {
         console.log('validateAddress() returns err: ' + JSON.stringify(err));
@@ -215,6 +207,7 @@ function updateAddress(event, callback) {
             if (err) {
                 console.log('updateAddress err: ' + JSON.stringify(err));
                 callback(err, null);
+                // TODO check errtype == 'ConditionalCheckFailedException'
             } else {
                 console.log('updateAddress success, data: ' + JSON.stringify(data));
                 callback(null, data);
@@ -226,7 +219,9 @@ function updateAddress(event, callback) {
 function deleteAddress(event, callback) {
     var params = {
         TableName: event.tableName,
-        Key: {'UUID': event.UUID}
+        Key: {'UUID': event.UUID},
+        ConditionExpression: "attribute_not_exists(#myid)",
+        ExpressionAttributeNames: {"#myid": "UUID"}
     };
     
     console.log('In deleteAddress, params is: ' + JSON.stringify(params));

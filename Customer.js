@@ -24,37 +24,90 @@ exports.handler = function(event, context, callback) {
             deleteCustomer(event, callback);
             break;
         default:
-            callback(new Error('Unrecognized operation "${event.operation}"'));
+            callback(new Error('405 Unrecognized operation'));
     }
 };
 
 function validateCreate(item) {
     var errEmail = validateEmail(item.email);
-    var errName = validateName(item.firstName, item.lastName);
-    var errPhone = validatePhone(item.phone); 
+    var errFirstName = validateFirstName(item.firstname);
+    var errLastName = validateLastName(item.lastname);
+    var errPhone = validatePhone(item.phone_num); 
     if(errEmail) {
-        return "invalid email";
+        return errEmail;
     }
-    if(errName) {
-        return "invalid name";
+    if(errFirstName) {
+        return errFirstName;
+    }
+    if(errLastName) {
+        return errLastName;
     }
     if(errPhone) {
-        return "invalid phone";
+        return errPhone;
     }
-}
-function validateEmail(email) {
-    var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    return !re.test(email);
+    // TODO: Check address_ref
+    return null;
 }
 
-function validateName(firstName, lastName) {
+function validateUpdate(updates) {
+    var errEmail = null;
+    var errFirstName = null;
+    var errLastName = null;
+    var errPhone = null; 
+    if (updates.email != undefined) errEmail = validateEmail(updates.email);
+    if (updates.firstname != undefined) errFirstName = validateFirstName(updates.firstname);
+    if (updates.lastname != undefined) errLastName = validateLastName(updates.lastname);
+    if (updates.phone_num != undefined) errPhone = validatePhone(updates.phone_num);
+    if(errEmail) {
+        return errEmail;
+    }
+    if(errFirstName) {
+        return errFirstName;
+    }
+    if(errLastName) {
+        return errLastName;
+    }
+    if(errPhone) {
+        return errPhone;
+    }
+    // TODO: Check address_ref
+    return null;
+}
+
+function validateEmail(email) {
+    var err = null;
+    var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    if (email == undefined || !re.test(email)) {
+        err = new Error('400 Email is invalid!');
+    }
+    return err;
+}
+
+function validateFirstName(name) {
+    var err = null;
     var re = /^[A-Za-z]+$/;
-    return !(re.test(firstName) && re.test(lastName));
+    if (name == undefined || !re.test(name)) {
+        err = new Error('400 First name is invalid!');
+    }
+    return err;
+}
+
+function validateLastName(name) {
+    var err = null;
+    var re = /^[A-Za-z]+$/;
+    if (name == undefined || !re.test(name)) {
+        err = new Error('400 Last name is invalid!');
+    }
+    return err;
 }
 
 function validatePhone(phone) {
+    var err = null;
     var re = /^\d+$/;
-    return !(re.test(phone) && phone.length == 10);
+    if (phone == undefined || !re.test(phone)) {
+        err = new Error('400 Phone number is invalid!');
+    }
+    return err;
 }
 
 function getCustomer(event, callback) {
@@ -76,7 +129,10 @@ function getCustomer(event, callback) {
             if (err) {
                 console.log('getCustomer err: ' + JSON.stringify(err));
                 callback(err, null);
-            } else {
+            } else if (Object.keys(data).length === 0) {
+                err = new Error('404, Item is not found in the table, cannot read!');
+                callback(err, null);
+           } else {
                 console.log('getCustomer success, data: ' + JSON.stringify(data));
                 callback(null, data);
             }
@@ -84,52 +140,27 @@ function getCustomer(event, callback) {
     }    
 }
 
-function hashString(s) {
-    // NOTE: This hash generates a signed int
-    // Borrowed from a post on StackOverflow
-    var hash = 0, i, chr, len;
-    if (s.length === 0) return hash;
-    for (i = 0, len = s.length; i < len; i++) {
-        chr   = s.charCodeAt(i);
-        hash  = ((hash << 5) - hash) + chr;
-        hash |= 0; // Convert to 32bit integer
-    }
-    return hash.toString();
-}
-
-function genAddressID(item) {
-    return hashString(item.city + item.street + item.number + item.zipcode);
-}
-
 function createCustomer(event, callback) {
     var params = {
         TableName: event.tableName,
-        Item: {
-            "email": event.item.email,
-            "lastName": event.item.lastName,
-            "firstName": event.item.firstName,
-            "phone": event.item.phone,
-        },
-        ConditionExpression: ''
+        Item: event.item,
+        ConditionExpression: "attribute_not_exists(#myid)",
+        ExpressionAttributeNames: {"#myid": "email"}
     };
 
     console.log('In createCustomer, params is: ' + JSON.stringify(params));
 
-    var errorInput = validateCreate(params.Item);
+    var err = validateCreate(params.Item);
 
-    if (errorInput) {
-        console.log('Invalid Input: ' + JSON.stringify(errorInput));
-        callback(errorInput, null);
+    if (err) {
+        console.log('Invalid Input: ' + JSON.stringify(err));
+        callback(err, null);
     } else {
-        params.Item.addressReference = genAddressID(event.item.address);
-        params.ConditionExpression  = "attribute_not_exists(#myid)";
-        params.ExpressionAttributeNames = {
-            "#myid": "email"
-        };
         dynamo.putItem(params, function(err, data) {
             if (err) {
                 console.log('createCustomer err: ' + JSON.stringify(err));
                 callback(err, null);
+                // TODO check errtype == 'ConditionalCheckFailedException'
             } else {
                 console.log('createCustomer success, data: ' + JSON.stringify(data));
                 callback(null, data);
@@ -139,9 +170,9 @@ function createCustomer(event, callback) {
 }
 
 function updateExpression(updates, params) {
-    var expr = "SET";
-    var exprAttrName = {};
-    var exprAttrVal = {};
+    var expr = " SET";
+    var exprAttrName = params.ExpressionAttributeNames;
+    var exprAttrVal = params.ExpressionAttributeValues;
 
     for (var key in updates) {
         var attrKey = "#" + key;
@@ -156,9 +187,7 @@ function updateExpression(updates, params) {
     console.log("Translated exprAttrName in updateExpression: " + JSON.stringify(exprAttrName));
     console.log("Translated exprAttrVal in updateExpression: " + JSON.stringify(exprAttrVal));
 
-    params.UpdateExpression = expr;
-    params.ExpressionAttributeNames = exprAttrName;
-    params.ExpressionAttributeValues = exprAttrVal;
+    params.UpdateExpression += expr;
 
     return params;
 }
@@ -167,17 +196,15 @@ function updateCustomer(event, callback) {
     var params = {
         TableName: event.tableName,
         Key: {'email': event.email},
+        ConditionExpression: "attribute_exists(#myid)",
         UpdateExpression: "",
-        ExpressionAttributeNames: {},
+        ExpressionAttributeNames: {"#myid": "email"},
         ExpressionAttributeValues: {}
     };
 
     console.log('In updateCustomer, params is: ' + JSON.stringify(params));
     
-    // TODO: Add condition expression 
-    // TODO: validate input data
-    //var err = validateUpdate(event.updates);
-    var err = null;
+    var err = validateUpdate(event.updates);
     if (err) {
         console.log('validateEmail() returns err: ' + JSON.stringify(err));
         callback(err, null);
@@ -187,6 +214,7 @@ function updateCustomer(event, callback) {
             if (err) {
                 console.log('updateCustomer err: ' + JSON.stringify(err));
                 callback(err, null);
+                // TODO check errtype == 'ConditionalCheckFailedException'
             } else {
                 console.log('updateCustomer success, data: ' + JSON.stringify(data));
                 callback(null, data);
@@ -199,7 +227,8 @@ function deleteCustomer(event, callback) {
     var params = {
         TableName: event.tableName,
         Key: {'email': event.email},
-        ConditionExpression: ''
+        ConditionExpression: "attribute_exists(#myid)",
+        ExpressionAttributeNames: {"#myid": "email"}
     };
     
     console.log('In deleteCustomer, params is: ' + JSON.stringify(params));
@@ -210,10 +239,6 @@ function deleteCustomer(event, callback) {
         console.log('validateEmail() returns err: ' + JSON.stringify(errEmail));
         callback(errEmail, null);
     } else {
-        params.ConditionExpression  = "attribute_exists(#myid)";
-        params.ExpressionAttributeNames = {
-            "#myid": "email"
-        };
         dynamo.deleteItem(params, function(err, data) {
             if (err) {
                 console.log('deleteCustomer err: ' + JSON.stringify(err));
