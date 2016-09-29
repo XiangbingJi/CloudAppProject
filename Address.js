@@ -147,7 +147,8 @@ function createAddress(event, callback) {
         console.log('validateAddress() returns err: ' + JSON.stringify(err));
         callback(err, null);
     } else {
-        params.Item.UUID = generateUUID(); 
+        var thisUUID = generateUUID();
+        params.Item.UUID = thisUUID; 
         dynamo.putItem(params, function(err, data) {
             if (err && err.code == "ConditionalCheckFailedException") {
                 err = new Error('403 This address is already in the table');
@@ -159,6 +160,7 @@ function createAddress(event, callback) {
                 callback(err, null);
             } else {
                 console.log('createAddress success, data: ' + JSON.stringify(data));
+                data['UUID'] = thisUUID;
                 callback(null, data);
             }
         });
