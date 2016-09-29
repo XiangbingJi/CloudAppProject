@@ -220,7 +220,7 @@ function deleteAddress(event, callback) {
     var params = {
         TableName: event.tableName,
         Key: {'UUID': event.UUID},
-        ConditionExpression: "attribute_not_exists(#myid)",
+        ConditionExpression: "attribute_exists(#myid)",
         ExpressionAttributeNames: {"#myid": "UUID"}
     };
     
