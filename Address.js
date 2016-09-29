@@ -106,27 +106,34 @@ function validateAddress(item, create) {
                 }
                 break;
             case ('number'):
-                if (typeof item.number != 'number') {
-                    err = new Error('400 wrong type! number has to be a Js number type');
+                if (typeof item.number != 'string') {
+                    err = new Error('400 wrong type! number has to be a Js string type');
                     err.name = '400';
                     return err;
+                } else {
+                    var isNum = /^\d+$/.test(item.number);
+                    if(!isNum){
+                        err = new Error('400 wrong type! street number has to be number');
+                        err.name = '400';
+                        return err;
+                    }
                 }
                 break;
-            case ('zip'):
-                if (typeof item.zip != 'string') {
+            case ('zipcode'):
+                if (typeof item.zipcode != 'string') {
                     err = new Error('400 wrong type! zip code has to be a Js string type'); 
                     err.name = '400';
                     return err;
                 }
                 var re = /\d{5}/;
-                if (!re.test(item.zip)) {
+                if (!re.test(item.zipcode)) {
                     err = new Error('400 zip code has to be a 5-digits number');
                     err.name = '400';
                     return err;
                 }
                 break;
             default:
-                return new Error('400 new address can not have colmun other than city, street, number and zip');
+                return new Error('400 new address can not have colmun other than city, street, number and zipcode');
         }
     }
     return null;
