@@ -5,18 +5,18 @@ const doc = require('dynamodb-doc');
 const dynamo = new doc.DynamoDB();
 
 function generateUUID() {
-	var totalCharacters = 39; // length of number hash; in this case 0-39 = 40 characters
-	var txtUuid = "";
-	do {
-		var point = Math.floor(Math.random() * 10);
-		if (txtUuid.length === 0 && point === 0) {
-			do {
-				point = Math.floor(Math.random() * 10);
-			} while (point === 0);
-		}
-		txtUuid = txtUuid + point;
-	} while ((txtUuid.length - 1) < totalCharacters);
-	return txtUuid;
+    var totalCharacters = 39; // length of number hash; in this case 0-39 = 40 characters
+    var txtUuid = "";
+    do {
+        var point = Math.floor(Math.random() * 10);
+        if (txtUuid.length === 0 && point === 0) {
+            do {
+                point = Math.floor(Math.random() * 10);
+            } while (point === 0);
+        }
+        txtUuid = txtUuid + point;
+    } while ((txtUuid.length - 1) < totalCharacters);
+    return txtUuid;
 }
 
 
@@ -40,8 +40,8 @@ exports.handler = function(event, context, callback) {
             deleteAddress(event, callback);
             break;
         default:
-            var err = new Error('405 Unrecognized operation "${event.operation}"');
-            err.name = '405';
+            var err = new Error('405 Invalid request method');
+            err.name = 'Unrecognized operation "${event.operation}"';
             callback(err, null);
     }
 };
@@ -60,8 +60,8 @@ function getAddress(event, callback) {
            console.log('getAddress err: ' + JSON.stringify(err));
            callback(err, null);
        } else if (Object.keys(data).length === 0) {
-           err = new Error ('404 key not found in the table');
-           err.name = '404';
+           err = new Error ('404 Resource not found');
+           err.name = 'key not found in the table';
            callback(err, null);
        }
        else{
@@ -72,20 +72,21 @@ function getAddress(event, callback) {
 }
 
 function hasAllAttributes(item) {
-    // check whether the new Address has all four attributes city, number, street and zip
-    var obj = {'city': false, 'number': false, 'street': false, 'zip' : false};
+    // check whether the new Address has all four attributes city, number, street and zipcode
+    var obj = {'city': false, 'number': false, 'street': false, 'zipcode' : false};
     for (var key in item) {
         if (key in obj) obj.key = true;
     }
-    return obj.city && obj.number && obj.street && obj.zip;
+    return obj.city && obj.number && obj.street && obj.zipcode;
 }
 
+
 function validateAddress(item, create) {
-    // TODO: Check duplicate item
+    var err = null;
     if (create) {
         if (hasAllAttributes(item)) {
-            var err = new Error('400 newAddress does not have enough attributes');
-            err.name = '400';
+            err = new Error('400 Invalid parameter');
+            err.name = 'newAddress does not have enough attributes';
             return err;
         }
     } 
@@ -93,51 +94,54 @@ function validateAddress(item, create) {
         switch (col) {
             case ('city'):
                 if (typeof item.city != 'string') {
-                    err = new Error('400 wrong type! city has to be a Js string type');
-                    err.name = '400';
+                    err = new Error('400 Invalid parameter');
+                    err.name = 'wrong type! city has to be a Js string type';
                     return err;
                 }
                 break;
             case ('street'):
                 if (typeof item.street != 'string') { 
-                    err = new Error('400 wrong type! street has to be a Js string type');
-                    err.name = '400';
+                    err = new Error('400 Invalid parameter');
+                    err.name = 'wrong type! street has to be a Js string type';
                     return err;
                 }
                 break;
             case ('number'):
                 if (typeof item.number != 'string') {
-                    err = new Error('400 wrong type! number has to be a Js string type');
-                    err.name = '400';
+                    err = new Error('400 Invalid parameter');
+                    err.name = 'wrong type! number has to be a Js string type';
                     return err;
                 } else {
                     var isNum = /^\d+$/.test(item.number);
                     if(!isNum){
-                        err = new Error('400 wrong type! street number has to be number');
-                        err.name = '400';
+                        err = new Error('400 Invalid parameter');
+                        err.name = 'wrong type! street number has to be a real number';
                         return err;
                     }
                 }
                 break;
             case ('zipcode'):
                 if (typeof item.zipcode != 'string') {
-                    err = new Error('400 wrong type! zip code has to be a Js string type'); 
-                    err.name = '400';
+                    err = new Error('400 Invalid parameter'); 
+                    err.name = 'wrong type! zip code has to be a Js string type';
                     return err;
                 }
                 var re = /\d{5}/;
                 if (!re.test(item.zipcode)) {
-                    err = new Error('400 zip code has to be a 5-digits number');
-                    err.name = '400';
+                    err = new Error('400 Invalid parameter');
+                    err.name = 'zip code has to be a 5-digits number';
                     return err;
                 }
                 break;
             default:
-                return new Error('400 new address can not have colmun other than city, street, number and zipcode');
+               err = new Error('400 Invalid parameter');
+               err.name = 'add cannot have additional fields';
+               return err;
         }
     }
     return null;
 }
+
 
 function createAddress(event, callback) {
     var params = {
@@ -158,8 +162,8 @@ function createAddress(event, callback) {
         params.Item.UUID = thisUUID; 
         dynamo.putItem(params, function(err, data) {
             if (err && err.code == "ConditionalCheckFailedException") {
-                err = new Error('403 This address is already in the table');
-                err.name = "Permission denied";
+                err = new Error('403 Permission denied');
+                err.name = "This address is already in the table";
                 console.log('createAddress err: ' + JSON.stringify(err));
                 callback(err, null);
             } else if (err) {
@@ -217,8 +221,8 @@ function updateAddress(event, callback) {
         params = updateExpression(event.updates, params);
         dynamo.updateItem(params, function(err, data) {
             if (err && err.code == "ConditionalCheckFailedException") {
-                err = new Error('404 Updating address is not found in the table');
-                err.name = "Permission denied";
+                err = new Error('404 Resource not found');
+                err.name = "Updating address is not found in the table";
                 console.log('updateAddress err: ' + JSON.stringify(err));
                 callback(err, null);
             } else if (err) {
@@ -244,8 +248,8 @@ function deleteAddress(event, callback) {
     
     dynamo.deleteItem(params, function(err, data) {
         if (err && err.code == "ConditionalCheckFailedException") {
-            err = new Error('404 Deleting address is not found in the table');
-            err.name = "Permission denied";
+            err = new Error('404 Resource not found');
+            err.name = "Deleting address is not found in the table";
             console.log('deleteAddress err: ' + JSON.stringify(err));
             callback(err, null);
         } else if (err) {
