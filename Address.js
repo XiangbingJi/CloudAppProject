@@ -5,18 +5,18 @@ const doc = require('dynamodb-doc');
 const dynamo = new doc.DynamoDB();
 
 function generateUUID() {
-	var totalCharacters = 39; // length of number hash; in this case 0-39 = 40 characters
-	var txtUuid = "";
-	do {
-		var point = Math.floor(Math.random() * 10);
-		if (txtUuid.length === 0 && point === 0) {
-			do {
-				point = Math.floor(Math.random() * 10);
-			} while (point === 0);
-		}
-		txtUuid = txtUuid + point;
-	} while ((txtUuid.length - 1) < totalCharacters);
-	return txtUuid;
+    var totalCharacters = 39; // length of number hash; in this case 0-39 = 40 characters
+    var txtUuid = "";
+    do {
+        var point = Math.floor(Math.random() * 10);
+        if (txtUuid.length === 0 && point === 0) {
+            do {
+                point = Math.floor(Math.random() * 10);
+            } while (point === 0);
+        }
+        txtUuid = txtUuid + point;
+    } while ((txtUuid.length - 1) < totalCharacters);
+    return txtUuid;
 }
 
 
@@ -115,10 +115,11 @@ function validateAddress(item, create) {
                     var isNum = /^\d+$/.test(item.number);
                     if(!isNum){
                         err = new Error('400 Invalid parameter');
-                        err.name = '400 wrong type! street number has to be a real number';
+                        err.name = 'wrong type! street number has to be a real number';
                         return err;
                     }
                 }
+                break;
             case ('zipcode'):
                 if (typeof item.zipcode != 'string') {
                     err = new Error('400 Invalid parameter'); 
@@ -128,7 +129,7 @@ function validateAddress(item, create) {
                 var re = /\d{5}/;
                 if (!re.test(item.zipcode)) {
                     err = new Error('400 Invalid parameter');
-                    err.name = '400 zip code has to be a 5-digits number';
+                    err.name = 'zip code has to be a 5-digits number';
                     return err;
                 }
                 break;
@@ -161,8 +162,8 @@ function createAddress(event, callback) {
         params.Item.UUID = thisUUID; 
         dynamo.putItem(params, function(err, data) {
             if (err && err.code == "ConditionalCheckFailedException") {
-                err = new Error('403 This address is already in the table');
-                err.name = "Permission denied";
+                err = new Error('403 Permission denied');
+                err.name = "This address is already in the table";
                 console.log('createAddress err: ' + JSON.stringify(err));
                 callback(err, null);
             } else if (err) {
@@ -220,8 +221,8 @@ function updateAddress(event, callback) {
         params = updateExpression(event.updates, params);
         dynamo.updateItem(params, function(err, data) {
             if (err && err.code == "ConditionalCheckFailedException") {
-                err = new Error('404 Updating address is not found in the table');
-                err.name = "Permission denied";
+                err = new Error('404 Resource not found');
+                err.name = "Updating address is not found in the table";
                 console.log('updateAddress err: ' + JSON.stringify(err));
                 callback(err, null);
             } else if (err) {
@@ -247,8 +248,8 @@ function deleteAddress(event, callback) {
     
     dynamo.deleteItem(params, function(err, data) {
         if (err && err.code == "ConditionalCheckFailedException") {
-            err = new Error('404 Deleting address is not found in the table');
-            err.name = "Permission denied";
+            err = new Error('404 Resource not found');
+            err.name = "Deleting address is not found in the table";
             console.log('deleteAddress err: ' + JSON.stringify(err));
             callback(err, null);
         } else if (err) {
@@ -260,4 +261,3 @@ function deleteAddress(event, callback) {
         }
     });
 }
-

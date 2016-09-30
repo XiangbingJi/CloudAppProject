@@ -217,7 +217,7 @@ function updateCustomer(event, callback) {
         dynamo.updateItem(params, function(err, data) {
             if (err) {
                 if (err.code === 'ConditionalCheckFailedException') {
-                    err = new Error('404, permission denied');
+                    err = new Error('404, Resource not found');
                     err.name = 'updating Customer not exists in the table.';
                 }
                 console.log('updateCustomer err: ' + JSON.stringify(err));
@@ -250,7 +250,7 @@ function deleteCustomer(event, callback) {
         dynamo.deleteItem(params, function(err, data) {
             if (err) {
                 if (err.code === 'ConditionalCheckFailedException') {
-                    err = new Error('404, permission denied');
+                    err = new Error('404 Resource not found');
                     err.name = 'deleting Customer not exists in the table.';
                 }
                 console.log('deleteCustomer err: ' + JSON.stringify(err));
