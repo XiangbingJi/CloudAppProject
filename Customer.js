@@ -216,7 +216,7 @@ function updateCustomer(event, callback) {
         params = updateExpression(event.updates, params);
         dynamo.updateItem(params, function(err, data) {
             if (err && err.code == "ConditionalCheckFailedException") {
-                err = new Error('403 Updating customer is not found in the table');
+                err = new Error('404 Updating customer is not found in the table');
                 err.name = "Permission denied";
                 console.log('updateCustomer err: ' + JSON.stringify(err));
                 callback(err, null);
@@ -249,7 +249,7 @@ function deleteCustomer(event, callback) {
     } else {
         dynamo.deleteItem(params, function(err, data) {
             if (err && err.code == "ConditionalCheckFailedException") {
-                err = new Error('403 Deleting customer is not found in the table');
+                err = new Error('404 Deleting customer is not found in the table');
                 err.name = "Permission denied";
                 console.log('deleteCustomer err: ' + JSON.stringify(err));
                 callback(err, null);
