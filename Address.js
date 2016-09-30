@@ -59,9 +59,9 @@ function getAddress(event, callback) {
        if (err) {
            console.log('getAddress err: ' + JSON.stringify(err));
            callback(err, null);
-       } else if (JSON.stringify(data).length === 0) {
-           err = new Error ('key not found in the table');
-           err.name = '404';
+       } else if (Object.keys(data).length === 0) {
+           err = new Error ('404 Resource not found');
+           err.name = 'key not found in the table';
            callback(err, null);
        }
        else{
@@ -220,7 +220,7 @@ function updateAddress(event, callback) {
         params = updateExpression(event.updates, params);
         dynamo.updateItem(params, function(err, data) {
             if (err && err.code == "ConditionalCheckFailedException") {
-                err = new Error('403 Updating address is not found in the table');
+                err = new Error('404 Updating address is not found in the table');
                 err.name = "Permission denied";
                 console.log('updateAddress err: ' + JSON.stringify(err));
                 callback(err, null);
@@ -247,7 +247,7 @@ function deleteAddress(event, callback) {
     
     dynamo.deleteItem(params, function(err, data) {
         if (err && err.code == "ConditionalCheckFailedException") {
-            err = new Error('403 Deleting address is not found in the table');
+            err = new Error('404 Deleting address is not found in the table');
             err.name = "Permission denied";
             console.log('deleteAddress err: ' + JSON.stringify(err));
             callback(err, null);
