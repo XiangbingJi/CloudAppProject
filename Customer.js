@@ -24,9 +24,9 @@ exports.handler = function(event, context, callback) {
             deleteCustomer(event, callback);
             break;
         default:
-            err = new Error('405 Unrecognized operation');
-            err.name = 'Unrecognized operation "${event.operation}"'
-            callback(err, null)
+            var err = new Error('405 Unrecognized operation');
+            err.name = 'Unrecognized operation "${event.operation}"';
+            callback(err, null);
     }
 };
 
