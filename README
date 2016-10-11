@@ -1,0 +1,28 @@
+For those who are comfortable with CLI, please have a look at deploylambda.sh
+and invokelambda.sh, which can save you a lot of mouse clicks.
+
+Please have the aws CLI tool installed. deploylambda.sh is for
+creating/updating lambda functions and invokelambda.sh is for,
+invoking lambda functions. They simply call 'aws lambda create',
+'aws lambda update', and 'aws lambda invoke' to do the corresponding
+actions.
+
+Usage:
+Say you have a Test.js to deploy, then calling
+
+./deploylambda.sh Test
+
+will create Test.zip which has Test.js zipped inside and upload it
+to create/update the lambda function Test by using your current AWS
+credential. Many parameters are hard-coded, like the handler will
+be set to Test.handler in this example. Feel free to have a look at
+the sources to check how they are set.
+After deploying the lambda function, you may want to invoke it to
+do some tests. Here you got invokelambda.sh. Say you have a
+event_test.json which contains the event object in json format to
+feed to the Test function, then calling
+
+./invokelambda.sh Test event_test.json
+
+will invoke it with the event provided, and output the result to
+out.txt.
