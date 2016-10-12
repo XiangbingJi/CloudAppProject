@@ -709,7 +709,7 @@ definitions:
   customerPostTest1:
     type: "object"
     required:
-    - "address_ref"
+    - "address"
     - "email"
     - "firstname"
     - "lastname"
@@ -721,7 +721,7 @@ definitions:
         type: "string"
       email:
         type: "string"
-      address_ref:
+      address:
         type: "string"
       phone_num:
         type: "string"
@@ -779,7 +779,7 @@ definitions:
         type: "string"
       lastname:
         type: "string"
-      address_ref:
+      address:
         type: "string"
       phone_num:
         type: "string"

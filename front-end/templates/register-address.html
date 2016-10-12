@@ -1,0 +1,43 @@
+  <!-- need ng-submit -->
+  <form name = "addressForm" class = 'addressInfo'> 
+    <label> <strong> State </strong> </label>
+    <input type="text" placeholder="state" name="state" ng-model="state" ng-class = "{ active: addressForm.state.$error.required}" required/>
+    <div ng-messages="addressForm.state.$error" class ='errMessage'>
+      <div ng-message="required"> This field is required</div>
+    </div>
+
+    <div class = "separator"></div>
+
+    <label> <strong> City </strong> </label>
+    <input type="text" placeholder="city" name="city" ng-model="city" ng-class = "{ active: addressForm.city.$error.required}" required/>
+    <div ng-messages="addressForm.city.$error" class ='errMessage'>
+      <div ng-message="required"> This field is required</div>
+    </div>
+
+    <div class = "separator"></div>
+
+    <label> <strong> Street </strong> </label>
+    <input type="text" placeholder="street" name="street" ng-model="street" ng-class = "{ active: addressForm.street.$error.required}" required/>
+    <div ng-messages="addressForm.street.$error" class = 'errMessage'>
+      <div ng-message="required"> This field is required</div>
+    </div>
+
+    <div class = "separator"></div>
+
+    <label> <strong> Street Number </strong> </label>
+    <input type="text" placeholder="number" name = "number"  ng-model="number" ng-class = "{ active: addressForm.number.$error.required}" required/>
+    <div ng-messages="addressForm.number.$error" class = 'errMessage'>
+      <div ng-message="required"> This field is required</div>
+    </div>
+
+    <div class = "separator"></div>
+
+    <label> <strong> Zipcode </strong> </label>
+    <input type="text" placeholder="zipcode" name="zipCode" ng-model="zipCode" ng-class = "{ active: addressForm.zipCode.$error.required}" required/>
+    <div ng-messages="addressForm.zipCode.$error" class = 'errMessage'>
+      <div ng-message="required">This field is required</div>
+    </div>
+
+    <input type="submit" class="button" value="Submit" ng-class = "{hover: hovering}" ng-mouseenter="hovering=true" ng-mouseleave="hovering=false" ng-click = "submit()">
+  </form>
+

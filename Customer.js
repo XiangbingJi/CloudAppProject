@@ -24,9 +24,9 @@ exports.handler = function(event, context, callback) {
             deleteCustomer(event, callback);
             break;
         default:
-            err = new Error('405 Unrecognized operation');
-            err.name = 'Unrecognized operation "${event.operation}"'
-            callback(err, null)
+            var err = new Error('405 Unrecognized operation');
+            err.name = 'Unrecognized operation "${event.operation}"';
+            callback(err, null);
     }
 };
 
@@ -93,11 +93,28 @@ function validatePhone(phone) {
 }
 function hasAllAttributes(item) {
     // check whether the new customer has all necessary attributes.
-    var obj = {'firstname': false, 'lastname': false, 'email': false, 'phone_num' : false, 'address_ref' : false};
+    var obj = {'firstname': false, 'lastname': false, 'email': false, 'phone_num' : false, 'address' : false};
     for (var key in item) {
         if (key in obj) obj.key = true;
     }
     return obj.city && obj.number && obj.street && obj.zip && obj.address;
+}
+
+// Use this function with care! It modifies the content of data.
+function refineCustomerData(data, req) {
+    data.forEach(function(item) {
+        if (item.address) {
+            var addr = item.address;
+            item.address = {
+                "href": req.proto + "://" + req.host + "/" + req.stage + "/address/" + addr
+            };
+        }
+        if (item.email) {
+            item.self = {
+                "href": req.proto + "://" + req.host + "/" + req.stage + "/customer/" + item.email
+            };
+        }
+    });
 }
 
 function getCustomer(event, callback) {
@@ -125,6 +142,7 @@ function getCustomer(event, callback) {
                 callback(err, null);
            } else {
                 console.log('getCustomer success, data: ' + JSON.stringify(data));
+                refineCustomerData([data.Item], event.request);
                 callback(null, data);
             }
         });
@@ -288,7 +306,7 @@ function getCustomerAddress(event, callback) {
                 callback(err, null);
            } else {
                 console.log('getCustomer success, data: ' + JSON.stringify(data));
-                addressRef = data.Item.address_ref;
+                addressRef = data.Item.address;
                 params.TableName = 'Address';
                 params.Key = {'UUID': addressRef};
                 dynamo.getItem(params, function(err, data) {
