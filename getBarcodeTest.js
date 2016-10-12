@@ -5,15 +5,15 @@ exports.handler = function(event, context, callback) {
     // TODO implement
     // test getBarcode
     getBarcode(event, function(barcode) {
-        console.log("test part" + barcode);
+        console.log("test part: " + barcode);
         context.done();
     });
 };
 
 function getBarcode(item, callback) {
     // set auth-id and auth-token
-    var id = '******************************';
-    var token = '**********************';
+    var id = '****************************';
+    var token = '********************';
     var titleString = 'https://us-street.api.smartystreets.com/street-address?';
     var tileString  = "&'%20-H%20%22Content-Type:%20application/json";
     
@@ -52,9 +52,10 @@ function getBarcode(item, callback) {
                 process.stdout.write(d);
                 console.log('data: ' + d);
                 var obj = JSON.parse(d);
-                console.log('code: ' + obj[0]["delivery_point_barcode"]);
-                if (obj[0]["delivery_point_barcode"] === undefined) barcode = null;
+                if (obj[0] === undefined) barcode = null;
+                else if (obj[0]["delivery_point_barcode"] === undefined) barcode = null;
                 else barcode = obj[0]["delivery_point_barcode"];
+                console.log('code: ' + barcode);
                 callback(barcode);
             });
         }).on('error', function(e) {
