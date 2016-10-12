@@ -12,8 +12,8 @@ exports.handler = function(event, context, callback) {
 
 function getBarcode(item, callback) {
     // set auth-id and auth-token
-    var id = '****************************';
-    var token = '********************';
+    var id = '1a121d57-acec-669e-5f64-c413e1cd****';
+    var token = '0eBxLrzCLDYDZm77****';
     var titleString = 'https://us-street.api.smartystreets.com/street-address?';
     var tileString  = "&'%20-H%20%22Content-Type:%20application/json";
     
