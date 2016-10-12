@@ -4,8 +4,8 @@ const doc = require('dynamodb-doc');
 exports.handler = function(event, context, callback) {
     // TODO implement
     // test getBarcode
-    getBarcode(event, function(barcode) {
-        console.log("test part: " + barcode);
+    getBarcode(event, function(address) {
+        console.log("test part: " + JSON.stringify(address));
         context.done();
     });
 };
@@ -45,16 +45,23 @@ function getBarcode(item, callback) {
                         + "&street=" + item.number + "%20" + streetStr + "&city="
                         + cityStr + "&state=" + item.state + tileString;
         
-        var barcode;
+        var resAddress;
         https.get(urlString, function(res) {
             console.log("Got response: " + res.statusCode);
             res.on('data', function(d) {
                 process.stdout.write(d);
                 console.log('data: ' + d);
                 var obj = JSON.parse(d);
-                if (obj[0] === undefined || obj[0]["delivery_point_barcode"] === undefined) barcode = null;
-                else barcode = obj[0]["delivery_point_barcode"];
-                console.log('code: ' + barcode);
+                if (obj[0] === undefined) {
+                    resAddress = null;
+                    console.log('get response failed');
+                } else {
+                    resAddress = {};
+                    resAddress.addressBarcode = obj[0]["delivery_point_barcode"];
+                    resAddress.addressComponents = obj[0]["components"];
+                    console.log('code: ' + JSON.stringify(resAddress.addressBarcode));
+                    console.log('components: ' + JSON.stringify(resAddress.addressComponents));
+                }
                 callback(barcode);
             });
         }).on('error', function(e) {
