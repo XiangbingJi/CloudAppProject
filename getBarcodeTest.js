@@ -52,8 +52,7 @@ function getBarcode(item, callback) {
                 process.stdout.write(d);
                 console.log('data: ' + d);
                 var obj = JSON.parse(d);
-                if (obj[0] === undefined) barcode = null;
-                else if (obj[0]["delivery_point_barcode"] === undefined) barcode = null;
+                if (obj[0] === undefined || obj[0]["delivery_point_barcode"] === undefined) barcode = null;
                 else barcode = obj[0]["delivery_point_barcode"];
                 console.log('code: ' + barcode);
                 callback(barcode);
