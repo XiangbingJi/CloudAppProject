@@ -62,7 +62,7 @@ function getBarcode(item, callback) {
                     console.log('code: ' + JSON.stringify(resAddress.addressBarcode));
                     console.log('components: ' + JSON.stringify(resAddress.addressComponents));
                 }
-                callback(barcode);
+                callback(resAddress);
             });
         }).on('error', function(e) {
             console.log("Got error: " + e.message);
