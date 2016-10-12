@@ -1,0 +1,6 @@
+<form name = "logInfo" Id = "login">
+  <input type="email" placeholder="email" name="loginEmail" ng-model = "loginEmail" required/>
+  <div ng-show = "!loginValid">{{errorMessage}}</div>
+  <input type="submit" class="button" value="Next Step" ng-click = "attemptLogin(logInfo.loginEmail.$valid)" ng-class = "{hover: hovering}" ng-mouseenter="hovering=true" ng-mouseleave="hovering=false">
+  <a href = '#register/customer'> I'm a new user </a>
+</form>

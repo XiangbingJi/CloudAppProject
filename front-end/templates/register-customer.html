@@ -1,0 +1,37 @@
+  <!-- need ng-submit -->
+  <form name = "customerForm" class = 'customerInfo'> 
+    <label> <strong> Firstname </strong> </label>
+    <input type="text" placeholder="first name" name="firstName" ng-model="firstName" ng-class = "{ active: customerForm.firstName.$error.required}" required/>
+    <div ng-messages="customerForm.firstName.$error" class ='errMessage'>
+      <div ng-message="required"> This field is required</div>
+    </div>
+
+    <div class = "separator"></div>
+
+    <label> <strong> Lastname </strong> </label>
+    <input type="text" placeholder="last name" name="lastName" ng-model="lastName" ng-class = "{ active: customerForm.lastName.$error.required}" required/>
+    <div ng-messages="customerForm.lastName.$error" class = 'errMessage'>
+      <div ng-message="required"> This field is required</div>
+    </div>
+
+    <div class = "separator"></div>
+
+    <label> <strong> Email </strong> </label>
+    <input type="email" placeholder="name@example.com" name = "email"  ng-model="email" ng-class = "{ active: customerForm.email.$error.required || customerForm.email.$error.email}" required/>
+    <div ng-messages="customerForm.email.$error" class = 'errMessage'>
+      <div ng-message="required"> This field is required</div>
+      <div ng-message="email">Your email address is invalid</div>
+    </div>
+
+    <div class = "separator"></div>
+
+    <label> <strong> Phone Number </strong> </label>
+    <input type="text" placeholder="phone number" name="phoneNumber" ng-pattern="/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/" ng-model="phoneNumber" ng-class = "{ active: customerForm.phoneNumber.$error.required || customerForm.phoneNumber.$error.pattern}" required/>
+    <div ng-messages="customerForm.phoneNumber.$error" class = 'errMessage'>
+      <div ng-message="required">This field is required</div>
+      <div ng-message="pattern">Must be a valid 10 digit phone number</div>
+    </div>
+
+    <input type="submit" class="button" value="Next Step" ng-click="redirect(!customerForm.firstName.$error.required && !customerForm.lastName.$error.required && !customerForm.email.$error.required && !customerForm.email.$error.email && !customerForm.phoneNumber.$error.required && !customerForm.phoneNumber.$error.pattern)" ng-class = "{hover: hovering}" ng-mouseenter="hovering=true" ng-mouseleave="hovering=false">
+  </form>
+

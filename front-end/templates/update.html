@@ -1,0 +1,68 @@
+  <!-- need ng-submit -->
+  <form name = "updateForm" class = 'updateInfo'> 
+    <label> <strong> Name(First/Last) </strong> </label>
+    <input type="text" name="firstName" ng-model ="firstname" class = "name" ng-class = "{ active: updateForm.firstName.$error.required}" required/>
+    <input type="text" name="lastName" ng-model ="lastname"  class = "name" ng-class = "{ active: updateForm.lastName.$error.required}" required/>
+    
+    <div ng-messages="updateForm.firstName.$error" class ='errMessage'>
+      <div ng-message="required"> Firstname is required</div>
+    </div>
+    <div ng-messages="updateForm.lastName.$error" class ='errMessage'>
+      <div ng-message="required"> Lastname is required</div>
+    </div>
+
+    <div class = "separator"></div>
+
+
+    <label> <strong> Phone Number </strong> </label>
+    <input type="text" name="phoneNumber" ng-model ="phoneNumber" ng-pattern="/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/" ng-model="phoneNumber" ng-class = "{ active: updateForm.phoneNumber.$error.required ||updateForm.phoneNumber.$error.pattern}" required/>
+
+    <div ng-messages="updateForm.phoneNumber.$error" class = 'errMessage'>
+      <div ng-message="required">This field is required</div>
+      <div ng-message="pattern">Must be a valid 10 digit phone number</div>
+    </div>
+
+
+    <div class = "separator"></div>
+
+    <label> <strong> State </strong> </label>
+    <input type="text" name="state" ng-model ="state"  >
+
+    <div class = "separator"></div>
+
+    <label> <strong> City </strong> </label>
+    <input type="text" name="city" ng-model ="city"  >
+    <!-- div ng-messages="addressForm.city.$error" class ='errMessage'>
+      <div ng-message="required"> This field is required</div>
+    </div -->
+
+    <div class = "separator"></div>
+
+    <label> <strong> Street </strong> </label>
+    <input type="text" name="street" ng-model ="street" >
+    <!-- div ng-messages="addressForm.street.$error" class = 'errMessage'>
+      <div ng-message="required"> This field is required</div>
+    </div -->
+
+    <div class = "separator"></div>
+
+    <label> <strong> Street Number </strong> </label>
+    <input type="text" name = "number" ng-model ="number" >
+    <!-- div ng-messages="addressForm.number.$error" class = 'errMessage'>
+      <div ng-message="required"> This field is required</div>
+    </div -->
+
+    <div class = "separator"></div>
+
+    <label> <strong> Zipcode </strong> </label>
+    <input type="text" name="zipCode" ng-model ="zipcode"  >
+    <!--div ng-messages="addressForm.zipCode.$error" class = 'errMessage'>
+      <div ng-message="required">This field is required</div>
+    </div-->
+
+    <input type="submit" class="button" value="Submit" ng-class = "{hover: hovering}" ng-mouseenter="hovering=true" ng-mouseleave="hovering=false" ng-click = "submit()">
+  </form>
+<div class = "delete">
+  <input type="submit" class = "button" value="Delete Account" ng-class = "{hover: hovering}" ng-mouseenter="hovering=true" ng-mouseleave="hovering=false" ng-click = "delete()">
+</div>
+
