@@ -236,11 +236,12 @@ function createAddress(event, callback) {
                     if (err) {
                         // err.code == "ConditionalCheckFailedException"
                         console.log('createAddress: UUID conflict, treat it as successful creation');
+                        data = {};
                     }
                     else {
                         console.log('createAddress success, data: ' + JSON.stringify(data));
                     }
-                    data['UUID'] = barcode;
+                    data.UUID = barcode;
                     callback(null, data);
                 }
             });
@@ -248,17 +249,17 @@ function createAddress(event, callback) {
     });
 }
 
-function updateExpression(updates, params) {
+function updateExpression(item, params) {
     var expr = " SET";
     var exprAttrName = params.ExpressionAttributeNames;
     var exprAttrVal = params.ExpressionAttributeValues;
 
-    for (var key in updates) {
+    for (var key in item) {
         var attrKey = "#" + key;
         var attrVal = ":" + key;
         expr += " " + attrKey + " = " + attrVal + ",";
         exprAttrName[attrKey] = key;
-        exprAttrVal[attrVal] = updates[key];
+        exprAttrVal[attrVal] = item[key];
     }
     expr = expr.slice(0, -1);
 
@@ -272,49 +273,14 @@ function updateExpression(updates, params) {
 }
 
 function __doUpdateAddress(event, callback) {
-    var params = {
-        TableName: event.tableName,
-        Key: {'UUID': event.UUID},
-        ConditionExpression: "attribute_exists(#myid)",
-        UpdateExpression: "",
-        ExpressionAttributeNames: {"#myid": "UUID"},
-        ExpressionAttributeValues: {}
-    };
-
-    console.log('In __doUpdateAddress, params is: ' + JSON.stringify(params));
-    
-    //var barcode = validateAddress(event.updates, true);
-    validateAddress(event.updates, true, function(barcode) {
-        if (typeof barcode == 'object') {
-            // we got an error object
-            var err = barcode;
-            console.log('validateAddress() returns err: ' + JSON.stringify(err));
-            callback(err, null);
-        } else {
-            // Primary key cannot be modified
-            //event.updates.UUID = barcode;
-            params = updateExpression(event.updates, params);
-            dynamo.updateItem(params, function(err, data) {
-                if (err && err.code == "ConditionalCheckFailedException") {
-                    err = new Error('404 Resource not found');
-                    err.name = "Updating address is not found in the table";
-                    console.log('updateAddress err: ' + JSON.stringify(err));
-                    callback(err, null);
-                } else if (err) {
-                    console.log('updateAddress err: ' + JSON.stringify(err));
-                    callback(err, null);
-                } else {
-                    console.log('updateAddress success, data: ' + JSON.stringify(data));
-                    callback(null, data);
-                }
-            });
-        }
-    });
+    // have to create the updated address,
+    // for the primary key UUID isn't allowed to modify
+    createAddress(event, callback);
 }
 
 function updateAddress(event, callback) {
-    if (!hasAllAttributes(event.updates)) {
-        // if event.updates is lack of some attributes, patch it for verifying the address
+    if (!hasAllAttributes(event.item)) {
+        // if event.item is lack of some attributes, patch it for verifying the address
         getAddress({tableName: event.tableName, UUID: event.UUID}, function (err, data) { 
             if (err) {
                 console.log('updateAddress err: getAddress failed- ' + JSON.stringify(err));
@@ -322,11 +288,11 @@ function updateAddress(event, callback) {
             } 
             // patch missed fields by its original values
             for (var key in data.Item) {
-                if (!(key in event.updates) && key != 'UUID') {
-                    event.updates[key] = data.Item[key];
+                if (!(key in event.item) && key != 'UUID') {
+                    event.item[key] = data.Item[key];
                 }
             }
-            console.log('updateAddress: patched updates- ' + JSON.stringify(event.updates));
+            console.log('updateAddress: patched item- ' + JSON.stringify(event.item));
             __doUpdateAddress(event, callback);
         });
     } 
