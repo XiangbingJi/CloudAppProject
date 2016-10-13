@@ -1,0 +1,8 @@
+{
+    "operation": "update",
+    "tableName": "Address",
+    "UUID": "100277206997",
+    "item": {
+        "number": "423"
+    }
+}
