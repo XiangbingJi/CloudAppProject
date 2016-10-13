@@ -32,6 +32,6 @@
       <div ng-message="pattern">Must be a valid 10 digit phone number</div>
     </div>
 
-    <input type="submit" class="button" value="Next Step" ng-click="redirect(!customerForm.firstName.$error.required && !customerForm.lastName.$error.required && !customerForm.email.$error.required && !customerForm.email.$error.email && !customerForm.phoneNumber.$error.required && !customerForm.phoneNumber.$error.pattern)" ng-class = "{hover: hovering}" ng-mouseenter="hovering=true" ng-mouseleave="hovering=false">
+    <input type="submit" class="button" value="Next Step" ng-click="setInfo(firstName,lastName, email, phoneNumber); redirect(!customerForm.firstName.$error.required && !customerForm.lastName.$error.required && !customerForm.email.$error.required && !customerForm.email.$error.email && !customerForm.phoneNumber.$error.required && !customerForm.phoneNumber.$error.pattern)" ng-class = "{hover: hovering}" ng-mouseenter="hovering=true" ng-mouseleave="hovering=false">
   </form>
 

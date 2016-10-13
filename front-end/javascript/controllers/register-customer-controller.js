@@ -1,8 +1,19 @@
 angular.module('customerApp')
-.controller('registerCustomerCtrl', function($scope) {
+.controller('registerCustomerCtrl', function($scope, sharedProperties) {
+
+	$scope.setInfo = function (firstName,lastName,email,phoneNumber){
+		var customerInfo = {
+			'firstname' :firstName,
+			'lastname':lastName,
+			'email': email,
+			"phoneNumber": phoneNumber
+		};
+		sharedProperties.setInfo(customerInfo);
+	}
+
 	$scope.loginValid = true;
 	$scope.redirect = function(check){
-		console.log(check);
+		
 		$scope.loginValid= check;
 		if ($scope.loginValid) {
 			// get email check if it exists
