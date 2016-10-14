@@ -1,0 +1,11 @@
+{
+    "operation": "create",
+    "tableName": "Address",
+    "item": {
+        "city": "New York",
+        "street": "118th St",
+        "number": "421",
+        "state": "New York",
+        "zipcode": "10027"
+    }
+}
