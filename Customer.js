@@ -53,6 +53,7 @@ function validateCustomer(item) {
 
 function validateEmail(email) {
     // regular expression borrowed from a post in stackoverflow
+    // valid email is xxx@xxx.xxx
     var err = null;
     var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     if(email === undefined || !re.test(email)) {

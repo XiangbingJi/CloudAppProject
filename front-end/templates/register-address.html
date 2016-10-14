@@ -1,5 +1,5 @@
   <!-- need ng-submit -->
-  <form name = "addressForm" class = 'addressInfo'> 
+  <form name = "addressForm" class = 'addressInfo' ng-init = "getInfo()"> 
     <label> <strong> State </strong> </label>
     <input type="text" placeholder="state" name="state" ng-model="state" ng-class = "{ active: addressForm.state.$error.required}" required/>
     <div ng-messages="addressForm.state.$error" class ='errMessage'>
@@ -38,6 +38,6 @@
       <div ng-message="required">This field is required</div>
     </div>
 
-    <input type="submit" class="button" value="Submit" ng-class = "{hover: hovering}" ng-mouseenter="hovering=true" ng-mouseleave="hovering=false" ng-click = "submit()">
+    <input type="submit" class="button" value="Submit" ng-class = "{hover: hovering}" ng-mouseenter="hovering=true" ng-mouseleave="hovering=false" ng-click = " submit()">
   </form>
 
