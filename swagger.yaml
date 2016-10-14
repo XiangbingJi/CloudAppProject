@@ -1,7 +1,7 @@
 ---
 swagger: "2.0"
 info:
-  version: "2016-09-30T01:52:40Z"
+  version: "2016-10-13T19:01:43Z"
   title: "serverlessAPPAPI"
 host: "i1zu432nj9.execute-api.us-east-1.amazonaws.com"
 basePath: "/dev"
@@ -118,7 +118,7 @@ paths:
         200:
           description: "200 response"
           schema:
-            $ref: "#/definitions/Empty"
+            $ref: "#/definitions/addressGetReturn"
           headers:
             Access-Control-Allow-Origin:
               type: "string"
@@ -136,7 +136,11 @@ paths:
             responseParameters:
               method.response.header.Access-Control-Allow-Origin: "'*'"
             responseTemplates:
-              application/json: "#set($inputRoot = $input.path('$'))\n$input.json('$.Item')"
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n    \"UUID\"\
+                : $input.json('$.Item.UUID'),\n    \"street\": $input.json('$.Item.street'),\n\
+                \    \"number\": $input.json('$.Item.number'),\n    \"city\": $input.json('$.Item.city'),\n\
+                \    \"state\": $input.json('$.Item.state'),\n    \"zipcode\": $input.json('$.Item.zipcode')\n\
+                }"
           404.*:
             statusCode: "404"
             responseParameters:
@@ -171,7 +175,7 @@ paths:
         200:
           description: "200 response"
           schema:
-            $ref: "#/definitions/Empty"
+            $ref: "#/definitions/addressPUTReturn"
           headers:
             Access-Control-Allow-Origin:
               type: "string"
@@ -196,7 +200,8 @@ paths:
             responseParameters:
               method.response.header.Access-Control-Allow-Origin: "'*'"
             responseTemplates:
-              application/json: "#set($inputRoot = $input.path('$'))\n$input.json('$.Item')"
+              application/json: "#set($allParams = $input.params())\n{\n    \"UUID\"\
+                \ : $input.json('$.UUID')\n}\n"
           400.*:
             statusCode: "400"
             responseParameters:
@@ -215,7 +220,7 @@ paths:
                 }"
         requestTemplates:
           application/json: "{\n    \"operation\":\"update\",\n    \"tableName\":\"\
-            Address\",\n    \"UUID\":\"$input.params('UUID')\",\n    \"updates\":$input.json('$')\n\
+            Address\",\n    \"UUID\":\"$input.params('UUID')\",\n    \"item\":$input.json('$')\n\
             }"
         uri: "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:498679776130:function:Address/invocations"
         passthroughBehavior: "when_no_templates"
@@ -264,7 +269,7 @@ paths:
                 }"
         requestTemplates:
           application/json: "{\n    \"operation\":\"delete\",\n    \"tableName\":\"\
-            Address\",\n    \"email\":\"$input.params('email')\"\n}"
+            Address\",\n    \"UUID\":\"$input.params('UUID')\"\n}"
         uri: "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:498679776130:function:Address/invocations"
         passthroughBehavior: "when_no_templates"
         httpMethod: "POST"
@@ -412,7 +417,7 @@ paths:
         200:
           description: "200 response"
           schema:
-            $ref: "#/definitions/Empty"
+            $ref: "#/definitions/customerGetReturn"
           headers:
             Access-Control-Allow-Origin:
               type: "string"
@@ -430,7 +435,11 @@ paths:
             responseParameters:
               method.response.header.Access-Control-Allow-Origin: "'*'"
             responseTemplates:
-              application/json: "#set($inputRoot = $input.path('$'))\n$input.json('$.Item')"
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n    \"email\"\
+                : $input.json('$.Item.email'),\n    \"firstname\": $input.json('$.Item.firstname'),\n\
+                \    \"lastname\": $input.json('$.Item.lastname'),\n    \"phone number\"\
+                : $input.json('$.Item.phone_num'),\n    \"address link\": $input.json('$.Item.address.href'),\n\
+                \    \"customer link\": $input.json('$.Item.self.href')\n}"
           404.*:
             statusCode: "404"
             responseParameters:
@@ -440,8 +449,12 @@ paths:
                 \ Message\":$input.json('$.errorMessage'),\n    \"Details\":$input.json('$.errorType')\n\
                 }"
         requestTemplates:
-          application/json: "{\n    \"operation\":\"read\",\n    \"tableName\":\"\
-            Customer\",\n    \"email\":\"$input.params('email')\"\n}"
+          application/json: "{\n    \"operation\": \"read\",\n    \"tableName\": \"\
+            Customer\",\n    \"email\": \"$input.params('email')\",\n    \"request\"\
+            : {\n        \"proto\": \"$input.params().header.CloudFront-Forwarded-Proto\"\
+            ,\n        \"host\": \"$input.params().header.host\",\n        \"stage\"\
+            : \"$context.stage\",\n        \"resPath\": \"$context.resourcePath\"\n\
+            \    }\n}"
         uri: "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:498679776130:function:Customer/invocations"
         passthroughBehavior: "when_no_templates"
         httpMethod: "POST"
@@ -642,7 +655,7 @@ paths:
         200:
           description: "200 response"
           schema:
-            $ref: "#/definitions/Empty"
+            $ref: "#/definitions/addressGetReturn"
           headers:
             Access-Control-Allow-Origin:
               type: "string"
@@ -660,7 +673,11 @@ paths:
             responseParameters:
               method.response.header.Access-Control-Allow-Origin: "'*'"
             responseTemplates:
-              application/json: "#set($inputRoot = $input.path('$'))\n$input.json('$.Item')"
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n    \"UUID\"\
+                : $input.json('$.Item.UUID'),\n    \"street\": $input.json('$.Item.street'),\n\
+                \    \"number\": $input.json('$.Item.number'),\n    \"city\": $input.json('$.Item.city'),\n\
+                \    \"state\": $input.json('$.Item.state'),\n    \"zipcode\": $input.json('$.Item.zipcode')\n\
+                }"
           404.*:
             statusCode: "404"
             responseParameters:
@@ -706,6 +723,12 @@ paths:
         passthroughBehavior: "when_no_match"
         type: "mock"
 definitions:
+  addressPUTReturn:
+    type: "object"
+    properties:
+      UUID:
+        type: "string"
+    title: "address PUT return schema"
   customerPostTest1:
     type: "object"
     required:
@@ -733,6 +756,7 @@ definitions:
     required:
     - "city"
     - "number"
+    - "state"
     - "street"
     - "zipcode"
     properties:
@@ -744,12 +768,10 @@ definitions:
         type: "string"
       zipcode:
         type: "string"
-  addressPUT:
-    required:
-    - "UUID"
-    properties:
-      UUID:
+      state:
         type: "string"
+  addressPUT:
+    properties:
       city:
         type: "string"
       street:
@@ -757,6 +779,8 @@ definitions:
       number:
         type: "string"
       zipcode:
+        type: "string"
+      state:
         type: "string"
   Error:
     type: "object"
@@ -772,6 +796,38 @@ definitions:
       UUID:
         type: "string"
     title: "address POST return schema"
+  addressGetReturn:
+    type: "object"
+    properties:
+      street:
+        type: "string"
+      number:
+        type: "string"
+      city:
+        type: "string"
+      zipcode:
+        type: "string"
+      state:
+        type: "string"
+      UUID:
+        type: "string"
+    title: "address GET return schema"
+  customerGetReturn:
+    type: "object"
+    properties:
+      email:
+        type: "string"
+      firstname:
+        type: "string"
+      lastname:
+        type: "string"
+      phone number:
+        type: "string"
+      address link:
+        type: "string"
+      customer link:
+        type: "string"
+    title: "customer GET return schema"
   customerPutTest1:
     type: "object"
     properties:
