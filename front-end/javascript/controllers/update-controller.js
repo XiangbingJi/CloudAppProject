@@ -5,7 +5,9 @@ angular.module('customerApp')
 	$scope.customer = JSON.parse(JSON.stringify(sharedProperties.getInfoObj()));
 	$scope.validInfo = true;
 
-
+	$('#myModal').on('shown.bs.modal', function () {
+  		$('#myInput').focus()
+	})
 
 	$scope.submit = function(){
 		//check function
