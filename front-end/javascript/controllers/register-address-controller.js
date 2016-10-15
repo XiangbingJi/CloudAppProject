@@ -6,7 +6,7 @@ angular.module('customerApp')
 	$scope.getInfo = function (){
 		$scope.customerInfo = sharedProperties.getInfo();
 		// customerInfo is the obj with customer Infomation get from the previous page
-		//console.log($scope.customerInfo);
+		console.log($scope.customerInfo);
 	}
 
 	$scope.validInfo = true;

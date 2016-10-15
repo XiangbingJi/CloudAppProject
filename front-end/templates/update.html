@@ -1,8 +1,8 @@
   <!-- need ng-submit -->
   <form name = "updateForm" class = 'updateInfo'> 
     <label> <strong> Name(First/Last) </strong> </label>
-    <input type="text" name="firstName" ng-model ="firstname" class = "name" ng-class = "{ active: updateForm.firstName.$error.required}" required/>
-    <input type="text" name="lastName" ng-model ="lastname"  class = "name" ng-class = "{ active: updateForm.lastName.$error.required}" required/>
+    <input type="text" name="firstName" ng-model ="customer.firstname" class = "name" ng-class = "{ active: updateForm.firstName.$error.required}" required/>
+    <input type="text" name="lastName" ng-model ="customer.lastname"  class = "name" ng-class = "{ active: updateForm.lastName.$error.required}" required/>
     
     <div ng-messages="updateForm.firstName.$error" class ='errMessage'>
       <div ng-message="required"> Firstname is required</div>
@@ -15,7 +15,7 @@
 
 
     <label> <strong> Phone Number </strong> </label>
-    <input type="text" name="phoneNumber" ng-model ="phoneNumber" ng-pattern="/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/" ng-model="phoneNumber" ng-class = "{ active: updateForm.phoneNumber.$error.required ||updateForm.phoneNumber.$error.pattern}" required/>
+    <input type="text" name="phoneNumber" ng-model ="customer.phonenumber" ng-pattern="/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/" ng-class = "{ active: updateForm.phoneNumber.$error.required ||updateForm.phoneNumber.$error.pattern}" required/>
 
     <div ng-messages="updateForm.phoneNumber.$error" class = 'errMessage'>
       <div ng-message="required">This field is required</div>
@@ -26,12 +26,12 @@
     <div class = "separator"></div>
 
     <label> <strong> State </strong> </label>
-    <input type="text" name="state" ng-model ="state"  >
+    <input type="text" name="state" ng-model ="customer.address.state"  >
 
     <div class = "separator"></div>
 
     <label> <strong> City </strong> </label>
-    <input type="text" name="city" ng-model ="city"  >
+    <input type="text" name="city" ng-model ="customer.address.city"  >
     <!-- div ng-messages="addressForm.city.$error" class ='errMessage'>
       <div ng-message="required"> This field is required</div>
     </div -->
@@ -39,7 +39,7 @@
     <div class = "separator"></div>
 
     <label> <strong> Street </strong> </label>
-    <input type="text" name="street" ng-model ="street" >
+    <input type="text" name="street" ng-model ="customer.address.street" >
     <!-- div ng-messages="addressForm.street.$error" class = 'errMessage'>
       <div ng-message="required"> This field is required</div>
     </div -->
@@ -47,7 +47,7 @@
     <div class = "separator"></div>
 
     <label> <strong> Street Number </strong> </label>
-    <input type="text" name = "number" ng-model ="number" >
+    <input type="text" name = "number" ng-model ="customer.address.number" >
     <!-- div ng-messages="addressForm.number.$error" class = 'errMessage'>
       <div ng-message="required"> This field is required</div>
     </div -->
@@ -55,7 +55,7 @@
     <div class = "separator"></div>
 
     <label> <strong> Zipcode </strong> </label>
-    <input type="text" name="zipCode" ng-model ="zipcode"  >
+    <input type="text" name="zipCode" ng-model ="customer.address.zipcode"  >
     <!--div ng-messages="addressForm.zipCode.$error" class = 'errMessage'>
       <div ng-message="required">This field is required</div>
     </div-->

@@ -1,26 +1,51 @@
 angular.module('customerApp')
-.controller('updateCtrl', function($scope) {
+.controller('updateCtrl', function($scope,$http,sharedProperties) {
 
-	//get
-	$scope.firstname = "Donald";
-	$scope.lastname = "Trump";
-	$scope.phoneNumber = "1234567890";
-	$scope.state = "NY";
-	$scope.city = "New York";
-	$scope.street = "5th Avenue";
-	$scope.number = "725";
-	$scope.zipcode = "10022";
-
+	console.log(sharedProperties.getInfoObj());
+	$scope.customer = JSON.parse(JSON.stringify(sharedProperties.getInfoObj()));
 	$scope.validInfo = true;
+
+
+
 	$scope.submit = function(){
 		//check function
 		if ($scope.validInfo) {
 			// post
-			window.location = "#/";
+			var APIRoot = sharedProperties.getAPIRoot();
+			var originalInfo = sharedProperties.getInfoObj();
+			var customerKeyList = ['firstname', 'lastname', 'phonenumber'];
+			var addressKeyList = [];
+			var customerChanged = false;
+			for(var ki in customerKeyList){
+				var key = customerKeyList[ki];
+				if($scope.customer[key] != originalInfo[key]){
+					customerChanged = true;
+				}
+			}
+			if(customerChanged){
+				console.log("Puting");
+				$http({
+					method : "PUT",
+					url : $scope.customer.href,
+					data: {
+						'firstname': $scope.customer.firstname,
+						'lastname' : $scope.customer.lastname,
+						'phone_num' : $scope.customer.phonenumber 
+					}
+
+				}).then(function(response){
+					console.log("successed");
+
+				}, function(){
+					console.log("failed")
+				})
+
+			}
+			//window.location = "#/";
 		}
-		else {
-			$scope.validInfo = false;
-		}
+		//else {
+			//$scope.validInfo = false;
+		//}
 
 	}
 	$scope.delete = function(){
