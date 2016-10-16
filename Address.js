@@ -5,22 +5,6 @@ const https = require('https');
 const doc = require('dynamodb-doc');
 const dynamo = new doc.DynamoDB();
 
-function generateUUID() {
-    var totalCharacters = 39; // length of number hash; in this case 0-39 = 40 characters
-    var txtUuid = "";
-    do {
-        var point = Math.floor(Math.random() * 10);
-        if (txtUuid.length === 0 && point === 0) {
-            do {
-                point = Math.floor(Math.random() * 10);
-            } while (point === 0);
-        }
-        txtUuid = txtUuid + point;
-    } while ((txtUuid.length - 1) < totalCharacters);
-    return txtUuid;
-}
-
-
 exports.handler = function(event, context, callback) {
     console.log('handler event: ' + JSON.stringify(event));
     console.log('handler context: ' + JSON.stringify(context));
@@ -80,10 +64,10 @@ function hasAllAttributes(item) {
     return obj.city && obj.number && obj.street && obj.state && obj.zipcode;
 }
 
-function getBarcode(item, callback) {
+function getNormAddr(item, callback) {
     // set auth-id and auth-token
-    var id = '1a121d57-acec-669e-5f64-c413e1cd6fe2';
-    var token = '0eBxLrzCLDYDZm77ilmL';
+    var id = '1a121d57-acec-669e-5f64-c413e1cd****';
+    var token = '0eBxLrzCLDYDZm77****';
     var titleString = 'https://us-street.api.smartystreets.com/street-address?';
     var tileString  = "&'%20-H%20%22Content-Type:%20application/json";
     
@@ -91,7 +75,7 @@ function getBarcode(item, callback) {
     if (item.city === undefined || item.number === undefined || item.street === undefined
     || item.state === undefined || item.zipcode === undefined) {
         console.log('Lost some fields');
-        callback(null);
+        callback(new Error('400 Invalid address: Lost some fields'), null);
     } else {
         // use SmartyStreet API and get the barcode from the response
         // create corresponding street string
@@ -115,21 +99,27 @@ function getBarcode(item, callback) {
                         + "&street=" + item.number + "%20" + streetStr + "&city="
                         + cityStr + "&state=" + item.state + tileString;
         
-        var barcode;
         https.get(urlString, function(res) {
             console.log("Got response: " + res.statusCode);
             res.on('data', function(d) {
                 process.stdout.write(d);
                 console.log('data: ' + d);
                 var obj = JSON.parse(d);
-                if (obj[0] === undefined || obj[0]["delivery_point_barcode"] === undefined) barcode = null;
-                else barcode = obj[0]["delivery_point_barcode"];
-                console.log('code: ' + barcode);
-                callback(barcode);
+                if (obj[0] === undefined) {
+                    console.log('get response failed');
+                    callback(new Error('400 Invalid address'), null);
+                } else {
+                    var resAddress = {};
+                    resAddress.barcode = obj[0]["delivery_point_barcode"];
+                    resAddress.components = obj[0]["components"];
+                    console.log('code: ' + JSON.stringify(resAddress.addressBarcode));
+                    console.log('components: ' + JSON.stringify(resAddress.addressComponents));
+                    callback(null, resAddress);
+                }
             });
         }).on('error', function(e) {
             console.log("Got error: " + e.message);
-            callback(null);
+            callback(new Error('500 Failed to get address, err: ' + e.message), null);
         });
     }
 }
@@ -140,7 +130,7 @@ function validateAddress(item, create, callback) {
         if (!hasAllAttributes(item)) {
             err = new Error('400 Invalid parameter');
             err.name = 'newAddress does not have enough attributes';
-            callback(err);
+            callback(err, null);
         }
     } 
     for (var col in item) {
@@ -149,27 +139,27 @@ function validateAddress(item, create, callback) {
                 if (typeof item.city != 'string') {
                     err = new Error('400 Invalid parameter');
                     err.name = 'wrong type! city has to be a Js string type';
-                    callback(err);
+                    callback(err, null);
                 }
                 break;
             case ('street'):
                 if (typeof item.street != 'string') { 
                     err = new Error('400 Invalid parameter');
                     err.name = 'wrong type! street has to be a Js string type';
-                    callback(err);
+                    callback(err, null);
                 }
                 break;
             case ('number'):
                 if (typeof item.number != 'string') {
                     err = new Error('400 Invalid parameter');
                     err.name = 'wrong type! number has to be a Js string type';
-                    callback(err);
+                    callback(err, null);
                 } else {
                     var isNum = /^\d+$/.test(item.number);
                     if(!isNum){
                         err = new Error('400 Invalid parameter');
                         err.name = 'wrong type! street number has to be a real number';
-                        callback(err);
+                        callback(err, null);
                     }
                 }
                 break;
@@ -177,56 +167,62 @@ function validateAddress(item, create, callback) {
                 if (typeof item.state != 'string') { 
                     err = new Error('400 Invalid parameter');
                     err.name = 'wrong type! state has to be a Js string type';
-                    callback(err);
+                    callback(err, null);
                 }
                 break;
             case ('zipcode'):
                 if (typeof item.zipcode != 'string') {
                     err = new Error('400 Invalid parameter'); 
                     err.name = 'wrong type! zip code has to be a Js string type';
-                    callback(err);
+                    callback(err, null);
                 }
                 var re = /\d{5}/;
                 if (!re.test(item.zipcode)) {
                     err = new Error('400 Invalid parameter');
                     err.name = 'zip code has to be a 5-digits number';
-                    callback(err);
+                    callback(err, null);
                 }
                 break;
             default:
                err = new Error('400 Invalid parameter');
                err.name = 'add cannot have additional fields';
-               callback(err);
+               callback(err, null);
         }
     }
-    getBarcode(item, function(barcode) {
-        if (barcode === null) {
-            callback(new Error('400 Invalid address'));
-        } else {
-            callback(barcode);
-        }
-    });
+    getNormAddr(item, callback);
+}
+
+function ssAddr2DBFields(addr) {
+    var comp = addr.components;
+    return {
+        'UUID': addr.barcode,
+        'number': comp.primary_number,
+        'city': comp.city_name,
+        'street': (comp.street_predirection ? (comp.street_predirection + " ") : "") +
+                comp.street_name +
+                (comp.street_postdirection ? (" " + comp.street_postdirection) : "") +
+                (comp.street_suffix ? (" " + comp.street_suffix) : ""),
+        'state': comp.state_abbreviation,
+        'zipcode': comp.zipcode + (comp.plus4_code ? ("-" + comp.plus4_code) : "")
+    };
 }
 
 function createAddress(event, callback) {
     var params = {
         TableName: event.tableName,
-        Item: event.item,
+        Item: {},
         ConditionExpression: "attribute_not_exists(#myid)",
         ExpressionAttributeNames: {"#myid": "UUID"}
     };
 
     console.log('In createAddress, params is: ' + JSON.stringify(params));
 
-    //var barcode = validateAddress(params.Item, true);
-    validateAddress(params.Item, true, function(barcode) {
-        if (typeof barcode == 'object') {
-            // we got an error object
-            var err = barcode;
+    validateAddress(event.item, true, function(err, addr) {
+        if (err) {
             console.log('validateAddress() returns err: ' + JSON.stringify(err));
             callback(err, null);
         } else {
-            params.Item.UUID = barcode; 
+            params.Item = ssAddr2DBFields(addr);
             dynamo.putItem(params, function(err, data) {
                 // Return OK and the UUID when address is already in table
                 if (err && err.code != "ConditionalCheckFailedException") {
@@ -236,13 +232,12 @@ function createAddress(event, callback) {
                     if (err) {
                         // err.code == "ConditionalCheckFailedException"
                         console.log('createAddress: UUID conflict, treat it as successful creation');
-                        data = {};
                     }
                     else {
                         console.log('createAddress success, data: ' + JSON.stringify(data));
                     }
-                    data.UUID = barcode;
-                    callback(null, data);
+                    // return the UUID as the API response
+                    callback(null, { UUID: params.Item.UUID });
                 }
             });
         }
