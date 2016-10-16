@@ -2,10 +2,10 @@
 	var app = angular.module('customerApp', ['ngRoute','ngMessages']);
 	app.service('sharedProperties', function() {
 
-	var customerInfo = {
+       var customerInfo = {
 
-	};
-    return {
+       };
+       return {
         getInfoObj: function() {
             return customerInfo;
         },

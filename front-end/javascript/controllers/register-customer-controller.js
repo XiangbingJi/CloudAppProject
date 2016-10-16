@@ -6,7 +6,7 @@ angular.module('customerApp')
 			'firstname' :firstName,
 			'lastname':lastName,
 			'email': email,
-			"phoneNumber": phoneNumber
+			"phonenumber": phoneNumber
 		};
 		sharedProperties.setInfo(customerInfo);
 	}

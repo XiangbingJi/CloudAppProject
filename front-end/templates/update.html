@@ -1,94 +1,98 @@
   <!-- need ng-submit -->
-<form name = "updateForm" class = 'updateInfo'> 
-  <div class="form-group">
-    <label> <strong> Name(First/Last) </strong> </label>
-    <input type="text" name="firstName" ng-model ="customer.firstname" class = "name" ng-class = "{ active: updateForm.firstName.$error.required}" required/>
-    <input type="text" name="lastName" ng-model ="customer.lastname"  class = "name" ng-class = "{ active: updateForm.lastName.$error.required}" required/>
-    
-    <div ng-messages="updateForm.firstName.$error" class ='errMessage'>
-      <div ng-message="required"> Firstname is required</div>
-    </div>
-    <div ng-messages="updateForm.lastName.$error" class ='errMessage'>
-      <div ng-message="required"> Lastname is required</div>
-    </div>
+  <form name = "updateForm" class = 'updateInfo'> 
+    <div class="form-group">
+      <label> <strong> Name(First/Last) </strong> </label>
+      <input type="text" name="firstName" ng-model ="customer.firstname" class = "name" ng-class = "{ active: updateForm.firstName.$error.required}" required/>
+      <input type="text" name="lastName" ng-model ="customer.lastname"  class = "name" ng-class = "{ active: updateForm.lastName.$error.required}" required/>
 
-    <label> <strong> Phone Number </strong> </label>
-    <input type="text" name="phoneNumber" ng-model ="customer.phonenumber" ng-pattern="/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/" ng-class = "{ active: updateForm.phoneNumber.$error.required ||updateForm.phoneNumber.$error.pattern}" required/>
-
-    <div ng-messages="updateForm.phoneNumber.$error" class = 'errMessage'>
-      <div ng-message="required">This field is required</div>
-      <div ng-message="pattern">Must be a valid 10 digit phone number</div>
-    </div>
-    <input type="submit" class="btn btn-primary" value="Submit" ng-class = "{hover: hovering}" style = "float: right" ng-click = "submit()">
-  </div>
-  <div class="form-group">
-    <label> <strong> State </strong> </label>
-    <p type="text" name="state">{{customer.address.state}}</p>
-
-    <label> <strong> City </strong> </label>
-    <p type="text" name="city"  >{{customer.address.city}}</p>
-
-
-    <label> <strong> Street </strong> </label>
-    <p type="text" name="street" >{{customer.address.street}}</p>
-
-    <label> <strong> Street Number </strong> </label>
-    <p type="text" name = "number" >{{customer.address.number}}</p>
-
-    <label> <strong> Zipcode </strong> </label>
-    <p type="text" name="zipCode" >{{customer.address.zipcode}}</p>
-    <button class="btn btn-primary"  data-toggle="modal" data-target="#myModal" style = "float: right" >Change Address</button>
-
-  </div>
-
-</form>
-<div class = "delete">
-  <input type="submit" class = "btn btn-warning" value="Delete Account" ng-class = "{hover: hovering}"  ng-click = "delete()">
-</div>
-
-<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+      <div ng-messages="updateForm.firstName.$error" class ='errMessage'>
+        <div ng-message="required"> Firstname is required</div>
       </div>
-      <div class="modal-body">
-        <div class="row">
-          <div class="col-md-4">
-            <form>
-              <div class="form-group">
-                <label for="Number Input">Street Number</label>
-                <input class="form-control" id="numberInput" placeholder="Street number">
-              </div>
-              <div class="form-group">
-                <label for="addressInput">Street</label>
-                <input class="form-control" id="addressInput" placeholder="Steet">
-              </div>
-              
-              <div class="form-group">
-                <label for="cityInput">City</label>
-                <input class="form-control" id="cityInput" placeholder="City">
-              </div>
-              <div class="form-group">
-                <label for="stateInput">state</label>
-                <input class="form-control" id="stateInput" placeholder="State">
-              </div>
-              <div class="form-group">
-                <label for="zipcodeInput">Zip Code</label>
-                <input class="form-control" id="zipcodeInput" placeholder="Zipcode">
-              </div>
-            </form>
-          </div>
+      <div ng-messages="updateForm.lastName.$error" class ='errMessage'>
+        <div ng-message="required"> Lastname is required</div>
+      </div>
 
-          <div class="col-md-8">
+      <label> <strong> Phone Number </strong> </label>
+      <input type="text" name="phoneNumber" ng-model ="customer.phonenumber" ng-pattern="/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/" ng-class = "{ active: updateForm.phoneNumber.$error.required ||updateForm.phoneNumber.$error.pattern}" required/>
+
+      <div ng-messages="updateForm.phoneNumber.$error" class = 'errMessage'>
+        <div ng-message="required">This field is required</div>
+        <div ng-message="pattern">Must be a valid 10 digit phone number</div>
+      </div>
+      <input type="submit" class="btn btn-primary" value="Submit" ng-class = "{hover: hovering}" style = "float: right" ng-click = "submit()">
+    </div>
+    <div class="form-group">
+      <label> <strong> State </strong> </label>
+      <p type="text" name="state">{{customer.address.state}}</p>
+
+      <label> <strong> City </strong> </label>
+      <p type="text" name="city"  >{{customer.address.city}}</p>
+
+
+      <label> <strong> Street </strong> </label>
+      <p type="text" name="street" >{{customer.address.street}}</p>
+
+      <label> <strong> Street Number </strong> </label>
+      <p type="text" name = "number" >{{customer.address.number}}</p>
+
+      <label> <strong> Zipcode </strong> </label>
+      <p type="text" name="zipCode" >{{customer.address.zipcode}}</p>
+      <button class="btn btn-primary"  data-toggle="modal" data-target="#myModal" style = "float: right" >Change Address</button>
+
+    </div>
+
+  </form>
+  <div class = "delete">
+    <input type="submit" class = "btn btn-warning" value="Delete Account" ng-class = "{hover: hovering}"  ng-click = "delete()">
+  </div>
+
+  <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-md-4">
+              <form>
+                <div class="form-group">
+                  <label for="addressInput">Street</label>
+                  <input class="form-control" id="addressInput" placeholder="Steet" ng-model="address.line1" ng-change="autocompleteAddress()">
+                </div>
+                <div class="form-group">
+                  <label for="cityInput">City</label>
+                  <input class="form-control" id="cityInput" placeholder="City" ng-model="address.city" ng-change="autocompleteAddress()">
+                </div>
+                <div class="form-group">
+                  <label for="stateInput">state</label>
+                  <input class="form-control" id="stateInput" placeholder="State" ng-model="address.state" ng-change="autocompleteAddress()">
+                </div>
+                <div class="form-group">
+                  <label for="zipcodeInput">Zip Code</label>
+                  <input class="form-control" id="zipcodeInput" placeholder="Zipcode" ng-model="address.zipcode" ng-change="autocompleteAddress()">
+                </div>
+              </form>
+            </div>
+
+            <div class="col-md-8">
+              <table class="table table-hover table-condensed">
+                <tbody>
+                  <tr ng-repeat="suggestion in addressSuggestions">
+                    <td>{{suggestion.text}}</td>
+                    <td>
+                    <button class="btn" ng-class="suggestion.button_class" ng-click="selectAddress(suggestion)">{{suggestion.button_text}}</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save changes</button>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        </div>
       </div>
     </div>
   </div>
-</div>
