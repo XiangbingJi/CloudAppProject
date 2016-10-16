@@ -1,5 +1,6 @@
 angular.module('customerApp')
 .controller('loginCtrl', function($scope,$http, sharedProperties) {
+
 	$scope.loginValid = true;
 	$scope.attemptLogin = function(check){
 		if(!check){
