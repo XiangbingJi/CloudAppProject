@@ -1,7 +1,7 @@
   <!-- need ng-submit -->
   <form name = "customerForm" class = 'customerInfo'> 
     <label> <strong> Firstname </strong> </label>
-    <input type="text" placeholder="first name" name="firstName" ng-model="firstName" ng-class = "{ active: customerForm.firstName.$error.required}" required/>
+    <input type="text" placeholder="first name" name="firstName" ng-model="customer.firstname" ng-class = "{ active: customerForm.firstName.$error.required}" required/>
     <div ng-messages="customerForm.firstName.$error" class ='errMessage'>
       <div ng-message="required"> This field is required</div>
     </div>
@@ -9,7 +9,7 @@
     <div class = "separator"></div>
 
     <label> <strong> Lastname </strong> </label>
-    <input type="text" placeholder="last name" name="lastName" ng-model="lastName" ng-class = "{ active: customerForm.lastName.$error.required}" required/>
+    <input type="text" placeholder="last name" name="lastName" ng-model="customer.lastname" ng-class = "{ active: customerForm.lastName.$error.required}" required/>
     <div ng-messages="customerForm.lastName.$error" class = 'errMessage'>
       <div ng-message="required"> This field is required</div>
     </div>
@@ -17,7 +17,7 @@
     <div class = "separator"></div>
 
     <label> <strong> Email </strong> </label>
-    <input type="email" placeholder="name@example.com" name = "email"  ng-model="email" ng-class = "{ active: customerForm.email.$error.required || customerForm.email.$error.email}" required/>
+    <input type="email" placeholder="name@example.com" name = "email"  ng-model="customer.email" ng-class = "{ active: customerForm.email.$error.required || customerForm.email.$error.email}" required/>
     <div ng-messages="customerForm.email.$error" class = 'errMessage'>
       <div ng-message="required"> This field is required</div>
       <div ng-message="email">Your email address is invalid</div>
@@ -26,35 +26,39 @@
     <div class = "separator"></div>
 
     <label> <strong> Phone Number </strong> </label>
-    <input type="text" placeholder="phone number" name="phoneNumber" ng-pattern="/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/" ng-model="phoneNumber" ng-class = "{ active: customerForm.phoneNumber.$error.required || customerForm.phoneNumber.$error.pattern}" required/>
+    <input type="text" placeholder="phone number" name="phoneNumber" ng-pattern="/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/" ng-model="customer.phonenumber" ng-class = "{ active: customerForm.phoneNumber.$error.required || customerForm.phoneNumber.$error.pattern}" required/>
     <div ng-messages="customerForm.phoneNumber.$error" class = 'errMessage'>
       <div ng-message="required">This field is required</div>
       <div ng-message="pattern">Must be a valid 10 digit phone number</div>
     </div>
-
-    <button type="submit" class="btn btn-primary" style="float:right" ng-click="setInfo(firstName,lastName, email, phoneNumber); redirect(!customerForm.firstName.$error.required && !customerForm.lastName.$error.required && !customerForm.email.$error.required && !customerForm.email.$error.email && !customerForm.phoneNumber.$error.required && !customerForm.phoneNumber.$error.pattern)" ng-class = "{hover: hovering}" ng-mouseenter="hovering=true" ng-mouseleave="hovering=false">Next Step</button>
-    <div ng-class="displayAddress">
-    <div class="form-group">
-        <label for="addressDisplay">Street</label>
-        <input class="form-control" id="addressDisplay"  ng-model="customer.address.street"  disabled>
-      </div>
-      <div class="form-group">
-        <label for="addressDisplay">Street</label>
-        <input class="form-control" id="addressDisplay"  ng-model="customer.address.street"  disabled>
-      </div>
-      <div class="form-group">
-        <label for="cityDisplay">City</label>
-        <input class="form-control" id="cityDisplay"  ng-model="customer.address.city"  disabled>
-      </div>
-      <div class="form-group">
-        <label for="stateDisplay">state</label>
-        <input class="form-control" id="stateDisplay" ng-model="customer.address.state"  disabled>
-      </div>
-      <div class="form-group">
-        <label for="zipcodeDisplay">Zip Code</label>
-        <input class="form-control" id="zipcodeDisplay" ng-model="customer.address.zipcode"  disabled>
-      </div>
+    <div class = "separator"></div>
+    <button class="btn btn-primary"  ng-show="!displayAddress" data-toggle="modal" data-target="#myModal" style = "float: right" >Input Address</button>
+    <div class = "separator"></div>
+    
+    <div class="form-group" ng-show="displayAddress">
+      <label for="numberDisplay">Number</label>
+      <input class="form-control" id="numberDisplay"  ng-model="customer.address.number"  disabled>
     </div>
+    <div class="form-group" ng-show="displayAddress">
+      <label for="addressDisplay">Street</label>
+      <input class="form-control" id="addressDisplay"  ng-model="customer.address.street"  disabled>
+    </div>
+    <div class="form-group" ng-show="displayAddress">
+      <label for="cityDisplay">City</label>
+      <input class="form-control" id="cityDisplay"  ng-model="customer.address.city"  disabled>
+    </div>
+    <div class="form-group" ng-show="displayAddress">
+      <label for="stateDisplay">state</label>
+      <input class="form-control" id="stateDisplay" ng-model="customer.address.state"  disabled>
+    </div>
+    <div class="form-group" ng-show="displayAddress">
+      <label for="zipcodeDisplay">Zip Code</label>
+      <input class="form-control" id="zipcodeDisplay" ng-model="customer.address.zipcode"  disabled>
+    </div>
+
+    <button type="submit" class="btn btn-primary" style="float:right" ng-click="submit(!customerForm.firstName.$error.required && !customerForm.lastName.$error.required && !customerForm.email.$error.required && !customerForm.email.$error.email && !customerForm.phoneNumber.$error.required && !customerForm.phoneNumber.$error.pattern)" ng-class = "{hover: hovering}" ng-mouseenter="hovering=true" ng-mouseleave="hovering=false" ng-show="displayAddress">Confirm</button>
+
+    <div class = "separator"></div>
   </form>
 
   <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
