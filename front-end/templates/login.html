@@ -1,6 +1,6 @@
-<form name = "logInfo" Id = "login">
-  <input type="email" placeholder="email" name="loginEmail" ng-model = "loginEmail" required/>
+<form name = "logInfo" Id = "login" class="form-group">
+  <input type="email" placeholder="Email" name="loginEmail" ng-model = "loginEmail" required/>
   <div ng-show = "!loginValid">{{errorMessage}}</div>
-  <input type="submit" class="button" value="Next Step" ng-click = "attemptLogin(logInfo.loginEmail.$valid)" ng-class = "{hover: hovering}" ng-mouseenter="hovering=true" ng-mouseleave="hovering=false">
-  <a href = '#register/customer'> I'm a new user </a>
+  <input type="submit" class="button" value="Log In" ng-click = "attemptLogin(logInfo.loginEmail.$valid)" ng-class = "{hover: hovering}" ng-mouseenter="hovering=true" ng-mouseleave="hovering=false">
+  <a href = '#register/customer'> Register </a>
 </form>

@@ -1,22 +1,20 @@
 (function() {
 	var app = angular.module('customerApp', ['ngRoute','ngMessages']);
-
 	app.service('sharedProperties', function() {
 
-	var customerInfo = {
-		'firstname': 'Donald',
-		'lastname': 'Trump',
-		'email': 'DonaldTrump@gmail.com',
-		"phoneNumber": '1234567890'
-	};
-    
-    return {
-        getInfo: function() {
+       var customerInfo = {
+
+       };
+       return {
+        getInfoObj: function() {
             return customerInfo;
         },
-        setInfo: function(obj) {
+        setInfoObj: function(obj) {
         	customerInfo = obj;
-        }
+        },
+        getAPIRoot: function(){
+        	return 'https://i1zu432nj9.execute-api.us-east-1.amazonaws.com/dev/';
+        } 
     }
 });
 })();
