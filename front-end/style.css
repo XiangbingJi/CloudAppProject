@@ -1,0 +1,152 @@
+body {
+	background-image: url("http://files.vividscreen.info/soft/9ca16e4ff701ec7926595d3018db4cf4/Empire-State-City-2880x1920.jpg");
+	background-size: cover;                   
+    background-repeat:   no-repeat;
+}
+.customerInfo {
+	width: 300px;
+
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: 100px;
+	background: #EEEEEF;
+	padding: 30px 30px 30px 30px;
+}
+.errMessage {
+	color: red;
+	margin: 0px 0px 0px 5px;
+}
+.customerInfo input[type="text"], .customerInfo input[type="email"] {
+	width: 100%;
+	height: 25px;
+	padding: 0px 0px 0px 0px;
+	font-size: 100%;
+	margin: 0px 0px 0px 5px;
+}
+.customerInfo label {
+	display: block;
+	margin: 0px 0px 5px 5px;
+}
+.separator {
+	margin: 50px 0px 50px 5px;
+}
+.active {
+	border: 1px solid red;
+}
+.button {
+	color: white;
+	font-weight:bold;
+	background: #187EE5;
+	margin: 10px 0px 0px 230px;
+	border: 1px #0169D1;
+	width: 25%;
+	height: 30px;
+}
+
+/* login.html */
+#login {
+	width: 300px;
+
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: 200px;
+	background: #EEEEEF;
+	padding: 30px 30px 30px 30px;
+}
+#login input[type = "email"]{
+	width: 99%;
+	height: 30px;
+	padding: 0px 0px 0px 0px;
+	font-size: 100%;
+	margin: 0px 0px 0px 5px;
+}
+#login .button {
+	color: white;
+	font-weight:bold;
+	background: #187EE5;
+	margin: 10px 0px 0px 5px;
+	border: 1px #0169D1;
+	width: 100%;
+	height: 30px;
+}
+a {
+	color: blue;
+	display: block;
+	margin-left: 200px;
+	margin-top: 20px;
+}
+/* address.html */
+.addressInfo {
+	width: 300px;
+	height: 570px;
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: 50px;
+	background: #EEEEEF;
+	padding: 30px 30px 30px 30px;
+}
+
+
+.addressInfo input[type="text"], .addressInfo input[type="email"] {
+	width: 99%;
+	height: 25px;
+	padding: 0px 0px 0px 0px;
+	font-size: 100%;
+	margin: 0px 0px 0px 5px;
+}
+.addressInfo label {
+	display: block;
+	margin: 0px 0px 5px 5px;
+}
+/* update.html */
+.updateInfo {
+	width: 300px;
+
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: 50px;
+	background: #EEEEEF;
+	padding: 30px 30px 30px 30px;
+}
+
+.updateInfo input[type="text"], .updateInfo input[type="email"] {
+	width: 99%;
+	height: 25px;
+	padding: 0px 0px 0px 0px;
+	font-size: 100%;
+	margin: 0px 0px 0px 5px;
+}
+.updateInfo label {
+	display: block;
+	margin: 0px 0px 5px 5px;
+}
+
+.name{
+	display: inline-block !important;
+	width: 45% !important;
+}
+.updateInfo .button {
+	color: white;
+	font-weight:bold;
+	background: #187EE5;
+	margin: 20px 0px 0px 230px;
+	border: 1px #0169D1;
+	width: 25%;
+	height: 30px;
+}
+.delete {
+	position: absolute;
+	top: 40px;
+	right: 30px;
+}
+.delete .button {
+	color: white;
+	font-weight:bold;
+	background: #187EE5;
+	margin: 10px 0px 0px 0px;
+	border: 1px #0169D1;
+	width: 100%;
+	height: 30px;
+}
+
+

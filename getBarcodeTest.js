@@ -3,14 +3,15 @@ const doc = require('dynamodb-doc');
 
 exports.handler = function(event, context, callback) {
     // TODO implement
-    // test getBarcode
-    getBarcode(event, function(address) {
+    // test getNormAddr
+    getNormAddr(event, function(err, address) {
         console.log("test part: " + JSON.stringify(address));
-        context.done();
+        callback(err, address);
     });
 };
 
-function getBarcode(item, callback) {
+// get normalized address
+function getNormAddr(item, callback) {
     // set auth-id and auth-token
     var id = '1a121d57-acec-669e-5f64-c413e1cd****';
     var token = '0eBxLrzCLDYDZm77****';
@@ -21,7 +22,7 @@ function getBarcode(item, callback) {
     if (item.city === undefined || item.number === undefined || item.street === undefined
     || item.state === undefined || item.zipcode === undefined) {
         console.log('Lost some fields');
-        callback(null);
+        callback(new Error('400 Invalid address: Lost some fields'), null);
     } else {
         // use SmartyStreet API and get the barcode from the response
         // create corresponding street string
@@ -45,7 +46,6 @@ function getBarcode(item, callback) {
                         + "&street=" + item.number + "%20" + streetStr + "&city="
                         + cityStr + "&state=" + item.state + tileString;
         
-        var resAddress;
         https.get(urlString, function(res) {
             console.log("Got response: " + res.statusCode);
             res.on('data', function(d) {
@@ -53,20 +53,20 @@ function getBarcode(item, callback) {
                 console.log('data: ' + d);
                 var obj = JSON.parse(d);
                 if (obj[0] === undefined) {
-                    resAddress = null;
                     console.log('get response failed');
+                    callback(new Error('400 Invalid address'), null);
                 } else {
-                    resAddress = {};
-                    resAddress.addressBarcode = obj[0]["delivery_point_barcode"];
-                    resAddress.addressComponents = obj[0]["components"];
+                    var resAddress = {};
+                    resAddress.barcode = obj[0]["delivery_point_barcode"];
+                    resAddress.components = obj[0]["components"];
                     console.log('code: ' + JSON.stringify(resAddress.addressBarcode));
                     console.log('components: ' + JSON.stringify(resAddress.addressComponents));
+                    callback(null, resAddress);
                 }
-                callback(resAddress);
             });
         }).on('error', function(e) {
             console.log("Got error: " + e.message);
-            callback(null);
+            callback(new Error('500 Failed to get address, err: ' + e.message), null);
         });
     }
 }
