@@ -1,0 +1,10 @@
+{
+    "operation": "create",
+    "tableName": "Content",
+    "item": {
+        "property": "HBO",
+        "franchise": "Game Of Thrones",
+        "series": "Season 1",
+        "episode": "Episode 3"
+    }
+}
