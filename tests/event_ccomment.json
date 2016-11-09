@@ -1,0 +1,9 @@
+{
+    "operation": "create",
+    "tableName": "Comment",
+    "item": {
+        "comment": "You know nothing!",
+        "content_id": "1423059971648862809805320957648999447518",
+        "user_id": "hellooswin@gmail.com"
+    }
+}
