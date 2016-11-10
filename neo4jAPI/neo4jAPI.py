@@ -1,7 +1,7 @@
 #from neo4jrestclient.client import GraphDatabase
 def lambda_handler(event, context):
 
-    return 'Hello from Lambda'
+    return 'Hello from Lambda hahahahaha'
 
 '''
 
