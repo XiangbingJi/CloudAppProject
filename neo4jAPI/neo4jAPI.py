@@ -10,19 +10,27 @@ def getGDB():
                     
 
 def lambda_handler(event, context):
+
+    print "started, event is "
+    print event
     
 
     if(event['operation'] == 'create'):
         try:
             if(event['type'] == 'node'):
+                print "creating node"
                 createNode(event['label'], event['UUID'], event['href'])
             elif(event['type'] == 'relationship'):
                 createRelationship(event['relationship_type'], event['start_UUID'], event['end_UUID'])
-                return {"status" : "success"}
-        except:
+
+            return {"status" : "success"}
+        except Exception,e:
+            print "exception happend"
+            print e
             return {"status" : "fail"}
     elif(event['operation'] == 'get'):
         try:
+            #there is some problem
             if(event['type'] == 'node'):
                 data = getNode(event['label'], event['UUID'])
 
@@ -71,6 +79,5 @@ def getNode(label, UUID):
                 "href" : node['href']
             }
 
-    print returnValue
     return  returnValue
 
