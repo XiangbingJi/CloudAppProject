@@ -143,7 +143,8 @@ function getCustomer(event, callback) {
                 callback(err, null);
            } else {
                 console.log('getCustomer success, data: ' + JSON.stringify(data));
-                refineCustomerData([data.Item], event.request);
+                // Only come with request when invoked by API gateway
+                if (event.request) refineCustomerData([data.Item], event.request);
                 callback(null, data);
             }
         });
