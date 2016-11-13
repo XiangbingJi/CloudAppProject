@@ -8,6 +8,9 @@ def lambda_handler(event, context):
     if(event['relationship'] == 'follow'):
         if(event['operation'] == 'create'):
             createFollowRelationship(event['own_email'],event['target_email'])
+        if(event['operation'] == 'get'):
+            data = getFollowRelationshipTargets(event['own_email'])
+            return data
     
 
 def createFollowRelationship(ownUUID, targetUUID):
@@ -15,6 +18,27 @@ def createFollowRelationship(ownUUID, targetUUID):
     checkExistOrCreateCustomerInGraph(targetUUID);
 
     addRelationship("follow", ownUUID, targetUUID)
+
+def getFollowRelationshipTargets(ownUUID):
+    #TODO: Check if in dynamo
+
+    return getRelationshipTargets(ownUUID, 'follow')
+
+def getRelationshipTargets(UUID, relationshipType):
+    payload = {
+            "operation" : "get_relationship_targets",
+            "own_UUID" : UUID,
+            "relationship_type" : relationshipType
+    }
+
+    response = invokeNeo4jLambda(payload)
+    incomingPayload = getPayload(response)
+    print incomingPayload
+
+    if incomingPayload['status'] == 'success':
+        return incomingPayload['data']
+    else:
+        raise Exception("500 Can not get relationship targets")
 
 
 def checkExistOrCreateCustomerInGraph(UUID):
@@ -36,6 +60,8 @@ def getPayload(response):
 
 
 def invokeNeo4jLambda(payload):
+    print "invocking neo4j with payload:"
+    print payload
     response = client.invoke(
         FunctionName =  'Neo4jAPI',
         Payload = json.dumps(payload)
