@@ -40,24 +40,35 @@ def lambda_handler(event, context):
             return { "status" : "fail"}
     elif(event['operation'] == 'get_relationship_targets'):
         try:
-            targets = getRelationshipTargets(event['own_UUID'], event['relationship_type'])
+            targetType = ""
+            if "target_type" not in event:
+                targetType = None
+            else:
+                targetType = event["target_type"]
+            targets = getRelationshipTargets(event['own_UUID'], event['relationship_type'], targetType)
             return { "status" : "success", "data": targets}
-        except:
+        except Exception ,e:
+            print e
             return {"status" : "fail"}
 
         
 
 
 
-def getRelationshipTargets(startNodeUUID, relationshipType):
+def getRelationshipTargets(startNodeUUID, relationshipType, targetType = None):
     gdb = getGDB()
-    query = gdb.query(q = """match (n1 {{UUID:"{}"}}) - [rel:{}]-> (n) return distinct n""".format(startNodeUUID, relationshipType), returns=(client.Node))
+    if(targetType):
+        q = """match (n1 {{UUID:"{}"}}) - [rel:{}]-> (n:{}) return distinct n""".format(startNodeUUID, relationshipType,targetType)
+    else:
+        q = """match (n1 {{UUID:"{}"}}) - [rel:{}]-> (n) return distinct n""".format(startNodeUUID, relationshipType)
+    query = gdb.query(q = q, returns=(client.Node))
     result = []
     for res in query:
         result.append({
             "UUID": res[0]['UUID'],
-            "href": res[0]['href']
-            })
+            "href": res[0]['href'],
+            "type": getNodeLabel(res[0])
+        })
     return result
 
 
@@ -100,18 +111,19 @@ def getNode(label, UUID):
         print "ERROR: getNode, node does not exist"
         raise Exception("getNode: node does not exist")
 
-    #assume just one label per node
-    nodeLabel = ""
-    for label in node.labels:
-        nodeLabel = label
-        break
-
-
     returnValue = {
-                "label" : nodeLabel._label,
+                "label" : getNodeLabel(node),
                 "UUID" : node['UUID'],
                 "href" : node['href']
             }
 
     return  returnValue
 
+
+def getNodeLabel(node):
+    nodeLabel = ""
+    #assume only 1 label exist
+    for label in node.labels:
+        nodeLabel = label._label
+        break
+    return nodeLabel
