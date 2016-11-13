@@ -25,7 +25,9 @@ def checkIDInCustomer(ID):
             "tableName": "Customer",
             "email": ID
             }
-    invokeLambda("Customer", payload) # Exception is raised if ID not found
+    resp = getPayload(invokeLambda("Customer", payload))
+    if "errorMessage" in resp:
+        raise ValueError("400 ID not found: {} ({})".format(ID, resp["errorMessage"]))
 
 def checkIDInComment(ID):
     payload = {
@@ -33,7 +35,9 @@ def checkIDInComment(ID):
             "tableName": "Comment",
             "comment_id": ID
             }
-    invokeLambda("Comment", payload) # Exception is raised if ID not found
+    resp = getPayload(invokeLambda("Comment", payload))
+    if "errorMessage" in resp:
+        raise ValueError("400 ID not found: {} ({})".format(ID, resp["errorMessage"]))
 
 def checkIDInContent(ID):
     payload = {
@@ -41,7 +45,9 @@ def checkIDInContent(ID):
             "tableName": "Content",
             "content_id": ID
             }
-    invokeLambda("Content", payload) # Exception is raised if ID not found
+    resp = getPayload(invokeLambda("Content", payload))
+    if "errorMessage" in resp:
+        raise ValueError("400 ID not found: {} ({})".format(ID, resp["errorMessage"]))
 
 def createFollowRelationship(ownUUID, targetUUID):
     checkIDInCustomer(ownUUID)
