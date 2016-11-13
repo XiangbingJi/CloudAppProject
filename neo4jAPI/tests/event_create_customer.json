@@ -1,0 +1,7 @@
+{
+    "operation" : "create",
+    "type" : "node",
+    "label" : "customer",
+    "UUID" : "u2",
+    "href" : "href1"
+}
