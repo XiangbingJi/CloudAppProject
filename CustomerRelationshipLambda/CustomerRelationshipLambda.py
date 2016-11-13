@@ -18,7 +18,7 @@ def lambda_handler(event, context):
             data = getLikeRelationshipTargets(event['own_email'], event['target_type'])
             return data
 
-    
+
 def checkIDInCustomer(ID):
     payload = {
             "operation": "read",
@@ -26,7 +26,7 @@ def checkIDInCustomer(ID):
             "email": ID
             }
     invokeLambda("Customer", payload) # Exception is raised if ID not found
-    
+
 def checkIDInComment(ID):
     payload = {
             "operation": "read",
@@ -34,7 +34,7 @@ def checkIDInComment(ID):
             "comment_id": ID
             }
     invokeLambda("Comment", payload) # Exception is raised if ID not found
-    
+
 def checkIDInContent(ID):
     payload = {
             "operation": "read",
@@ -46,14 +46,14 @@ def checkIDInContent(ID):
 def createFollowRelationship(ownUUID, targetUUID):
     checkIDInCustomer(ownUUID)
     checkExistOrCreateCustomerInGraph(ownUUID)
-    checkIDInCustomer(targetUUID) 
+    checkIDInCustomer(targetUUID)
     checkExistOrCreateCustomerInGraph(targetUUID)
 
     addRelationship("follow", ownUUID, targetUUID)
 
 
-def createLikeRelationship(ownUUID, targetUUID, targetType): 
-    checkIDInCustomer(ownUUID) 
+def createLikeRelationship(ownUUID, targetUUID, targetType):
+    checkIDInCustomer(ownUUID)
     checkExistOrCreateCustomerInGraph(ownUUID)
     if(targetType == "comment"):
         checkIDInComment(targetUUID)
@@ -67,11 +67,11 @@ def createLikeRelationship(ownUUID, targetUUID, targetType):
     addRelationship("like", ownUUID, targetUUID)
 
 def getFollowRelationshipTargets(ownUUID):
-    checkIDInCustomer(ownUUID) 
+    checkIDInCustomer(ownUUID)
     return getRelationshipTargets(ownUUID, 'follow', 'customer')
 
 def getLikeRelationshipTargets(ownUUID, targetType):
-    checkIDInCustomer(ownUUID) 
+    checkIDInCustomer(ownUUID)
     return getRelationshipTargets(ownUUID, 'like', targetType)
 
 
@@ -152,9 +152,9 @@ def invokeLambda(func, payload):
     response = client.invoke(
         FunctionName =  func,
         Payload = json.dumps(payload)
-    ) 
+    )
     print "result is "
-    print response 
+    print response
 
     status = response['StatusCode']
     if status < 200 or status >299:
@@ -163,7 +163,7 @@ def invokeLambda(func, payload):
     return response
 
 def invokeNeo4jLambda(payload):
-    return invokeLambda('Neo4jAPI', payload) 
+    return invokeLambda('Neo4jAPI', payload)
 
 def createCustomer(UUID):
     try:
