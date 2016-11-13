@@ -19,23 +19,47 @@ def lambda_handler(event, context):
             return data
 
     
+def checkIDInCustomer(ID):
+    payload = {
+            "operation": "read",
+            "tableName": "Customer",
+            "email": ID
+            }
+    invokeLambda("Customer", payload) # Exception is raised if ID not found
+    
+def checkIDInComment(ID):
+    payload = {
+            "operation": "read",
+            "tableName": "Comment",
+            "comment_id": ID
+            }
+    invokeLambda("Comment", payload) # Exception is raised if ID not found
+    
+def checkIDInContent(ID):
+    payload = {
+            "operation": "read",
+            "tableName": "Content",
+            "content_id": ID
+            }
+    invokeLambda("Content", payload) # Exception is raised if ID not found
 
 def createFollowRelationship(ownUUID, targetUUID):
-
-    #TODO: check exist in dynamo db
+    checkIDInCustomer(ownUUID)
     checkExistOrCreateCustomerInGraph(ownUUID)
-    checkExistOrCreateCustomerInGraph(targetUUID);
+    checkIDInCustomer(targetUUID) 
+    checkExistOrCreateCustomerInGraph(targetUUID)
 
     addRelationship("follow", ownUUID, targetUUID)
 
 
-def createLikeRelationship(ownUUID, targetUUID, targetType):
-
-    #TODO: check exist in dynamo db or quit
+def createLikeRelationship(ownUUID, targetUUID, targetType): 
+    checkIDInCustomer(ownUUID) 
     checkExistOrCreateCustomerInGraph(ownUUID)
     if(targetType == "comment"):
+        checkIDInComment(targetUUID)
         checkExistOrCreateCommentInGraph(targetUUID)
     elif(targetType== "content"):
+        checkIDInContent(targetUUID)
         checkExistOrCreateContentInGraph(targetUUID)
     else:
         raise Exception("400 Invalid request")
@@ -43,13 +67,11 @@ def createLikeRelationship(ownUUID, targetUUID, targetType):
     addRelationship("like", ownUUID, targetUUID)
 
 def getFollowRelationshipTargets(ownUUID):
-    #TODO: Check if in dynamo
-
+    checkIDInCustomer(ownUUID) 
     return getRelationshipTargets(ownUUID, 'follow', 'customer')
 
 def getLikeRelationshipTargets(ownUUID, targetType):
-
-    #TODO: check if in dynamo
+    checkIDInCustomer(ownUUID) 
     return getRelationshipTargets(ownUUID, 'like', targetType)
 
 
@@ -124,19 +146,24 @@ def checkExistOrCreateContentInGraph(UUID):
 def getPayload(response):
     return json.loads(response['Payload'].read())
 
-
-def invokeNeo4jLambda(payload):
-    print "invocking neo4j with payload:"
+def invokeLambda(func, payload):
+    print 'invoking ' + func + ' with payload:'
     print payload
     response = client.invoke(
-        FunctionName =  'Neo4jAPI',
+        FunctionName =  func,
         Payload = json.dumps(payload)
-    )
-
+    ) 
     print "result is "
-    print response
+    print response 
+
+    status = response['StatusCode']
+    if status < 200 or status >299:
+        raise Exception("500 invoking lambda failed")
+
     return response
 
+def invokeNeo4jLambda(payload):
+    return invokeLambda('Neo4jAPI', payload) 
 
 def createCustomer(UUID):
     try:
