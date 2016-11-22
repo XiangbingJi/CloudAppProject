@@ -61,7 +61,6 @@ angular.module('customerApp')
         });
 
         function getFBInfo() {
-            var FBInfo = {};
             console.log('Welcome!  Fetching your information.... ');
             FB.api('/me', {fields: 'first_name, last_name, email' }, function(response) {
                 console.log('Successful login for: ' + response.first_name);
@@ -71,7 +70,6 @@ angular.module('customerApp')
                 authFact.setAccessToken(accessToken);
                 loginWithFBInfo(response);
             });
-            return FBInfo;
         }
         function FBLogin(){
             FB.login(function(response) {
