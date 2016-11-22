@@ -1,5 +1,13 @@
 angular.module('customerApp')
-.controller('registerCustomerCtrl', function($scope, $http, sharedProperties) {
+.controller('registerCustomerCtrl', function($scope, $http, authFact, sharedProperties) {
+
+
+	$scope.customer = JSON.parse(JSON.stringify(sharedProperties.getInfoObj()));
+	if ($scope.customer.FB) {
+	    $scope.firstname = $scope.customer.firstname;
+	    $scope.lastname = $scope.customer.lastname;
+	    $scope.email = $scope.customer.email;
+	}
 
 	$('#myModal').on('shown.bs.modal', function () {
   		$('#myInput').focus()
@@ -8,7 +16,8 @@ angular.module('customerApp')
 		console.log($scope.customer);
 	}
 	$scope.displayAddress=false;
-	$scope.customer = {};
+
+	/*
 	$scope.setInfo = function (firstName,lastName,email,phoneNumber){
 		var customerInfo = {
 			'firstname' :firstName,
@@ -18,6 +27,7 @@ angular.module('customerApp')
 		};
 		sharedProperties.setInfo(customerInfo);
 	}
+	*/
 
 	$scope.loginValid = true;
 	$scope.submit = function(check){
@@ -40,7 +50,18 @@ angular.module('customerApp')
 				url : APIRoot + "customer/",
 				data: POSTData
 			}).then(function(response){
-				window.location = "#/";
+				bootbox.alert({ 
+					size: "small",
+				    title: "System message",
+				    message: "Your Infomation is uploaded", 
+				    callback: function(){
+				    	var obj = {};
+						var accessToken = undefined;
+						sharedProperties.setInfoObj(obj);
+						authFact.setAccessToken(accessToken);
+						window.location = "#/";
+				   }
+				});
 			}, function(response){
 				console.log("error");
 				console.log(response);

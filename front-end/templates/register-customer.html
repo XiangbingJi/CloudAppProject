@@ -1,7 +1,7 @@
   <!-- need ng-submit -->
   <form name = "customerForm" class = 'customerInfo'> 
     <label> <strong> Firstname </strong> </label>
-    <input type="text" placeholder="first name" name="firstName" ng-model="customer.firstname" ng-class = "{ active: customerForm.firstName.$error.required}" required/>
+    <input type="text" placeholder="first name" name="firstName" ng-model="firstname" ng-class = "{ active: customerForm.firstName.$error.required}" required/>
     <div ng-messages="customerForm.firstName.$error" class ='errMessage'>
       <div ng-message="required"> This field is required</div>
     </div>
@@ -9,7 +9,7 @@
     <div class = "separator"></div>
 
     <label> <strong> Lastname </strong> </label>
-    <input type="text" placeholder="last name" name="lastName" ng-model="customer.lastname" ng-class = "{ active: customerForm.lastName.$error.required}" required/>
+    <input type="text" placeholder="last name" name="lastName" ng-model="lastname" ng-class = "{ active: customerForm.lastName.$error.required}" required/>
     <div ng-messages="customerForm.lastName.$error" class = 'errMessage'>
       <div ng-message="required"> This field is required</div>
     </div>
@@ -17,7 +17,7 @@
     <div class = "separator"></div>
 
     <label> <strong> Email </strong> </label>
-    <input type="email" placeholder="name@example.com" name = "email"  ng-model="customer.email" ng-class = "{ active: customerForm.email.$error.required || customerForm.email.$error.email}" required/>
+    <input type="email" placeholder="name@example.com" name = "email"  ng-model="email" ng-class = "{ active: customerForm.email.$error.required || customerForm.email.$error.email}" required/>
     <div ng-messages="customerForm.email.$error" class = 'errMessage'>
       <div ng-message="required"> This field is required</div>
       <div ng-message="email">Your email address is invalid</div>
