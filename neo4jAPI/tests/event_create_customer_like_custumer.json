@@ -1,0 +1,7 @@
+{
+    "operation" : "create",
+    "type" : "relationship",
+    "relationship_type" : "like",
+    "start_UUID" : "u1",
+    "end_UUID" : "u2"
+}
