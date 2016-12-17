@@ -3,9 +3,9 @@
     "tableName": "Address",
     "item": {
         "city": "New York",
-        "street": "118th St",
-        "number": "421",
-        "state": "New York",
-        "zipcode": "10027"
+        "number": "744",
+        "street": "5 ave",
+        "state": "NY",
+        "zipcode": "10135"
     }
 }
