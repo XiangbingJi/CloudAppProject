@@ -9,7 +9,7 @@ exports.handler = function(event, context, callback) {
     console.log('handler event: ' + JSON.stringify(event));
     console.log('handler context: ' + JSON.stringify(context));
 
-    if (event.Records != undefined)
+    if (event.Records !== undefined)
         event = JSON.parse(event.Records[0].Sns.Message);
     
     var operation = event.operation;
@@ -30,9 +30,23 @@ exports.handler = function(event, context, callback) {
         default:
             var err = new Error('405 Invalid request method');
             err.name = 'Unrecognized operation "${event.operation}"';
-            callback(err, null);
+            putResult(event.res_key, err, callback);
     }
 };
+
+function putResult(key, res, cb) {
+    var params = {
+        TableName: "Result",
+        Item: { "key": key, "result": JSON.stringify(res) }
+    };
+
+    dynamo.putItem(params, function(err, data) {
+        if (err) {
+            console.log('putResult err: ' + JSON.stringify(err));
+        }
+    });
+    cb(null, 'putResult ends');
+}
 
 function getAddress(event, callback) { 
     var params = {
@@ -45,15 +59,15 @@ function getAddress(event, callback) {
     dynamo.getItem(params, function (err, data) {
        if (err) {
            console.log('getAddress err: ' + JSON.stringify(err));
-           callback(err, null);
+           putResult(event.res_key, err, callback);
        } else if (Object.keys(data).length === 0) {
            err = new Error ('404 Resource not found');
            err.name = 'key not found in the table';
-           callback(err, null);
+           putResult(event.res_key, err, callback);
        }
        else{
            console.log('getAddress success, data: ' + JSON.stringify(data));
-           callback(null, data);
+           putResult(event.res_key, data.Item, callback);
        }
     });
 }
@@ -69,8 +83,8 @@ function hasAllAttributes(item) {
 
 function getNormAddr(item, callback) {
     // set auth-id and auth-token
-    var id = '';
-    var token = '';
+    var id = '1a121d57-acec-669e-5f64-c413e1cd6fe2';
+    var token = '0eBxLrzCLDYDZm77ilmL';
     var titleString = 'https://us-street.api.smartystreets.com/street-address?';
     var tileString  = "&'%20-H%20%22Content-Type:%20application/json";
     
@@ -210,17 +224,6 @@ function ssAddr2DBFields(addr) {
     };
 }
 
-function putResult(key, res, cb) {
-    var params = {
-        TableName: "Result",
-        Item: { "key": key, "result": JSON.stringify(res) }
-    };
-
-    dynamo.putItem(params, function(err, data) {
-        cb(err, data);
-    });
-}
-
 function createAddress(event, callback) {
     var params = {
         TableName: event.tableName,
@@ -290,19 +293,30 @@ function __doUpdateAddress(event, callback) {
 function updateAddress(event, callback) {
     if (!hasAllAttributes(event.item)) {
         // if event.item is lack of some attributes, patch it for verifying the address
-        getAddress({tableName: event.tableName, UUID: event.UUID}, function (err, data) { 
+        var params = {
+            TableName: event.tableName,
+            Key: {'UUID': event.UUID}
+        };
+        console.log('Get address in updateAddress, params is: ' + JSON.stringify(params));
+        dynamo.getItem(params, function (err, data) {
             if (err) {
-                console.log('updateAddress err: getAddress failed- ' + JSON.stringify(err));
-                callback(err, null);
-            } 
-            // patch missed fields by its original values
-            for (var key in data.Item) {
-                if (!(key in event.item) && key != 'UUID') {
-                    event.item[key] = data.Item[key];
-                }
+                console.log('Get address in updateAddress err: ' + JSON.stringify(err));
+                putResult(event.res_key, err, callback);
+            } else if (Object.keys(data).length === 0) {
+                err = new Error ('404 Resource not found');
+                err.name = 'updateAddress: key not found in the table';
+                putResult(event.res_key, err, callback);
             }
-            console.log('updateAddress: patched item- ' + JSON.stringify(event.item));
-            __doUpdateAddress(event, callback);
+            else{
+                // patch missed fields by its original values
+                for (var key in data.Item) {
+                    if (!(key in event.item) && key != 'UUID') {
+                        event.item[key] = data.Item[key];
+                    }
+                }
+                console.log('updateAddress: patched item- ' + JSON.stringify(event.item));
+                __doUpdateAddress(event, callback);
+            }
         });
     } 
     else {
@@ -325,13 +339,13 @@ function deleteAddress(event, callback) {
             err = new Error('404 Resource not found');
             err.name = "Deleting address is not found in the table";
             console.log('deleteAddress err: ' + JSON.stringify(err));
-            callback(err, null);
+            putResult(event.res_key, err, callback);
         } else if (err) {
             console.log('deleteAddress err: ' + JSON.stringify(err));
-            callback(err, null);
+            putResult(event.res_key, err, callback);
         } else {
             console.log('deleteAddress complete, data: ' + JSON.stringify(data));
-            callback(null, data);
+            putResult(event.res_key, { "result": event.UUID +  " is deleted" }, callback);
         }
     });
 }
