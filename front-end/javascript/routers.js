@@ -14,7 +14,8 @@ angular.module('customerApp')
  	})
  	.when('/update',{
  		templateUrl: '/templates/update.html',
- 		controller: 'updateCtrl'
+ 		controller: 'updateCtrl',
+ 		authenticated: true
  	})
  	.otherwise({ redirectTo: '/' });
 });

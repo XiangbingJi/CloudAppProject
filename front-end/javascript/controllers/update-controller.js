@@ -1,7 +1,7 @@
 angular.module('customerApp')
-.controller('updateCtrl', function($scope,$http,sharedProperties) {
+.controller('updateCtrl', function($scope, $http,  sharedProperties, authFact) {
 
-	console.log(sharedProperties.getInfoObj());
+	//console.log(sharedProperties.getInfoObj());
 	$scope.customer = JSON.parse(JSON.stringify(sharedProperties.getInfoObj()));
 	$scope.validInfo = true;
 
@@ -36,7 +36,14 @@ angular.module('customerApp')
 					}
 
 				}).then(function(response){
-					console.log("putting successed");
+					bootbox.alert({ 
+					   size: "small",
+					   title: "System message",
+					   message: "Your Information is updated!", 
+					   callback: function(){
+					   	  window.location = "#/";
+					   }
+					});
 
 				}, function(){
 					console.log("putting failed")
@@ -216,4 +223,54 @@ angular.module('customerApp')
 			console.log("autocomplete query fail");
 		});
 	}
+
+	$scope.logout = function() {
+		init();
+	};
+
+
+
+	$scope.deleteAccount = function() {
+		var url = APIRoot + "customer/" + $scope.customer.email;
+		console.log('break1');
+		bootbox.confirm({ 
+			size: "small",
+			message: "Are you sure?", 
+		    callback: function(result){
+		    	if (result) {
+		    		$http.delete(url).then(
+		    			function(response){
+		    			// success callback
+				         init();
+				         bootbox.alert({ 
+						   size: "small",
+						   title: "System message",
+						   message: "Your Account is deleted", 
+						   callback: function(){
+						   	  window.location = "#/";
+						   }
+						});
+				     }, 
+				        function(response){
+				           // failure call back
+				           alert("Got a problem with deleteAccount");
+				       }
+				     )
+		    	}
+		    	else {
+		    		window.location = "#/update";
+		    	}
+		    }
+		})
+	};
+
+	function init() {
+		console.log('break2');
+		var obj = {};
+		var accessToken = undefined;
+		sharedProperties.setInfoObj(obj);
+		authFact.setAccessToken(accessToken);
+		window.location = "#/";
+	}
+
 });

@@ -1,3 +1,11 @@
+<div class="dropdown">
+  <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">User Center
+  <span class="caret"></span></button>
+  <ul class="dropdown-menu">
+    <li ng-click = "logout()"><a href="#">log out</a></li>
+    <li ng-click = "deleteAccount()"><a href="#">delete account</a></li>
+  </ul>
+</div>
   <!-- need ng-submit -->
   <form name = "updateForm" class = 'updateInfo'> 
     <div>
@@ -48,9 +56,6 @@
       <div class = "separator"></div>
 
   </form>
-  <div class = "delete">
-    <input type="submit" class = "btn btn-warning" value="Delete Account" ng-class = "{hover: hovering}"  ng-click = "delete()">
-  </div>
 
   <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
     <div class="modal-dialog" role="document">
@@ -102,3 +107,4 @@
       </div>
     </div>
   </div>
+

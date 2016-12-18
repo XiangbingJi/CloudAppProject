@@ -3,8 +3,11 @@
   <head>
     <meta charset="utf-8">
     <META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
+
     <title> Customer Information System</title>
+    <link rel="stylesheet" type="text/css" href="bootstrap-social.css">
     <link rel="stylesheet" type="text/css" href="style.css">
+    
      <!-- Angular Material requires Angular.js Libraries -->
     <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"></script>
     <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular-animate.min.js"></script>
@@ -13,16 +16,19 @@
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular-route.min.js"></script>
  
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
     <!-- Latest compiled and minified JavaScript -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootbox.js/4.4.0/bootbox.min.js"></script>
+
 
   </head>
 
   <body ng-app = "customerApp">
-   
+    <div id="fb-root"></div>
     
     <div ng-view></div>
 
@@ -32,6 +38,7 @@
     <script src="/javascript/controllers/register-address-controller.js"></script>
     <script src="/javascript/controllers/login-controller.js"></script>
     <script src="/javascript/controllers/update-controller.js"></script>
+
 
   </body>
 
