@@ -8,6 +8,9 @@ const dynamo = new doc.DynamoDB();
 exports.handler = function(event, context, callback) {
     console.log('handler event: ' + JSON.stringify(event));
     console.log('handler context: ' + JSON.stringify(context));
+
+    if (event.Records != undefined)
+        event = JSON.parse(event.Records[0].Sns.Message);
     
     var operation = event.operation;
 
@@ -66,8 +69,8 @@ function hasAllAttributes(item) {
 
 function getNormAddr(item, callback) {
     // set auth-id and auth-token
-    var id = '1a121d57-acec-669e-5f64-c413e1cd****';
-    var token = '0eBxLrzCLDYDZm77****';
+    var id = '';
+    var token = '';
     var titleString = 'https://us-street.api.smartystreets.com/street-address?';
     var tileString  = "&'%20-H%20%22Content-Type:%20application/json";
     
@@ -207,6 +210,17 @@ function ssAddr2DBFields(addr) {
     };
 }
 
+function putResult(key, res, cb) {
+    var params = {
+        TableName: "Result",
+        Item: { "key": key, "result": JSON.stringify(res) }
+    };
+
+    dynamo.putItem(params, function(err, data) {
+        cb(err, data);
+    });
+}
+
 function createAddress(event, callback) {
     var params = {
         TableName: event.tableName,
@@ -220,14 +234,14 @@ function createAddress(event, callback) {
     validateAddress(event.item, true, function(err, addr) {
         if (err) {
             console.log('validateAddress() returns err: ' + JSON.stringify(err));
-            callback(err, null);
+            putResult(event.res_key, err, callback);
         } else {
             params.Item = ssAddr2DBFields(addr);
             dynamo.putItem(params, function(err, data) {
                 // Return OK and the UUID when address is already in table
                 if (err && err.code != "ConditionalCheckFailedException") {
                     console.log('createAddress err: ' + JSON.stringify(err));
-                    callback(err, null);
+                    putResult(event.res_key, err, callback);
                 } else {
                     if (err) {
                         // err.code == "ConditionalCheckFailedException"
@@ -237,7 +251,7 @@ function createAddress(event, callback) {
                         console.log('createAddress success, data: ' + JSON.stringify(data));
                     }
                     // return the UUID as the API response
-                    callback(null, { UUID: params.Item.UUID });
+                    putResult(event.res_key, { UUID: params.Item.UUID }, callback);
                 }
             });
         }
