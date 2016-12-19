@@ -1,6 +1,7 @@
 {
     "operation": "create",
     "tableName": "Address",
+    "topic": "arn:aws:sns:us-east-1:498679776130:Address",
     "item": {
         "city": "New York",
         "number": "744",

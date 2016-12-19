@@ -17,7 +17,10 @@ exports.handler = function(event, context, callback) {
         if (err) {
             console.log('get result err: ' + JSON.stringify(err));
             callback(err, null);
-        } else {
+        } else if (Object.keys(data).length === 0) {
+            err = new Error('404 Resource not found');
+            callback(err, null);
+        } else { 
             console.log('get result success, data: ' + JSON.stringify(data));
             var ret = data.Item.result;
 
