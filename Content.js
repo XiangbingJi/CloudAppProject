@@ -8,6 +8,9 @@ exports.handler = function(event, context, callback) {
     console.log('handler event: ' + JSON.stringify(event));
     console.log('handler context: ' + JSON.stringify(context));
 
+    if (event.Records !== undefined)
+        event = JSON.parse(event.Records[0].Sns.Message);
+
     var operation = event.operation;
 
     switch (operation) {
@@ -26,9 +29,24 @@ exports.handler = function(event, context, callback) {
         default:
             var err = new Error('405 Unrecognized operation');
             err.name = 'Unrecognized operation "${event.operation}"';
-            callback(err, null);
+            // callback(err, null);
+            putResult(event.res_key, err, callback);
     }
 };
+
+function putResult(key, res, cb) {
+    var params = {
+        TableName: "Result",
+        Item: { "key": key, "result": JSON.stringify(res) }
+    };
+
+    dynamo.putItem(params, function(err, data) {
+        if (err) {
+            console.log('putResult err: ' + JSON.stringify(err));
+        }
+    });
+    cb(null, 'putResult ends');
+}
 
 function randomID() {
   var totalCharacters = 39; // length of number hash; in this case 0-39 = 40 characters
@@ -132,19 +150,23 @@ function getContent(event, callback) {
 
     if(err) {
         console.log('validateID() returns err: ' + JSON.stringify(err));
-        callback(err, null);
+        // callback(err, null);
+        putResult(event.res_key, err, callback);
     } else {
         dynamo.getItem(params, function (err, data) {
             if (err) {
                 console.log('getContent err: ' + JSON.stringify(err));
-                callback(err, null);
+                // callback(err, null);
+                putResult(event.res_key, err, callback);
             } else if (Object.keys(data).length === 0) {
                 err = new Error('404 Resource not found');
                 err.name = 'Item is not found in the table, cannot read!';
-                callback(err, null);
+                // callback(err, null);
+                putResult(event.res_key, err, callback);
            } else {
                 console.log('getContent success, data: ' + JSON.stringify(data));
-                callback(null, data);
+                // callback(null, data);
+                putResult(event.res_key, data, callback);
             }
         });
     }
@@ -165,7 +187,8 @@ function createContent(event, callback) {
         console.log('400 Incomplete input');
         err = new Error('400 invalid parameter');
         err.name = 'Incomplete input';
-        callback(err, null);
+        // callback(err, null);
+        putResult(event.res_key, err, callback);
     }
     else
     {
@@ -173,7 +196,8 @@ function createContent(event, callback) {
 
         if (err) {
             console.log('Invalid Input: ' + JSON.stringify(err));
-            callback(err, null);
+            // callback(err, null);
+            putResult(event.res_key, err, callback);
         } else {
             params.Item.content_id = randomID();
             dynamo.putItem(params, function(err, data) {
@@ -183,11 +207,13 @@ function createContent(event, callback) {
                         err.name = 'ID conflicts';
                     }
                     console.log('createContent err: ' + JSON.stringify(err));
-                    callback(err, null);
+                    // callback(err, null);
+                    putResult(event.res_key, err, callback);
                 } else {
                     console.log('createContent success, data: ' + JSON.stringify(data));
                     data.content_id = params.Item.content_id;
-                    callback(null, data);
+                    // callback(null, data);
+                    putResult(event.res_key, data, callback);
                 }
             });
         }
@@ -232,7 +258,8 @@ function updateContent(event, callback) {
     var err = validateContent(event.item);
     if (err) {
         console.log('validateContent() returns err: ' + JSON.stringify(err));
-        callback(err, null);
+        // callback(err, null);
+        putResult(event.res_key, err, callback);
     } else {
         params = updateExpression(event.item, params);
         dynamo.updateItem(params, function(err, data) {
@@ -242,10 +269,12 @@ function updateContent(event, callback) {
                     err.name = 'updating content does not exist in the table.';
                 }
                 console.log('updateContent err: ' + JSON.stringify(err));
-                callback(err, null);
+                // callback(err, null);
+                putResult(event.res_key, err, callback);
             } else {
                 console.log('updateContent success, data: ' + JSON.stringify(data));
-                callback(null, data);
+                // callback(null, data);
+                putResult(event.res_key, data, callback);
             }
         });
     }
@@ -264,7 +293,8 @@ function deleteContent(event, callback) {
     var err = validateID(params.Key.content_id);
     if(err) {
         console.log('validateID() returns err: ' + JSON.stringify(err));
-        callback(err, null);
+        // callback(err, null);
+        putResult(event.res_key, err, callback);
     } else {
         dynamo.deleteItem(params, function(err, data) {
             if (err) {
@@ -273,10 +303,12 @@ function deleteContent(event, callback) {
                     err.name = 'deleting content does not exist in the table.';
                 }
                 console.log('deleteContent err: ' + JSON.stringify(err));
-                callback(err, null);
+                // callback(err, null);
+                putResult(event.res_key, err, callback);
             } else {
                 console.log('deleteContent complete, data: ' + JSON.stringify(data));
-                callback(null, data);
+                // callback(null, data);
+                putResult(event.res_key, data, callback);
             }
         });
     }
