@@ -1,23 +1,55 @@
 import boto3
 import json
 client = boto3.client('lambda')
+dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
+resultTable = dynamodb.Table('Result')
+resultKey = "default-customer-relationship-lambda-result-key"
 
+
+class CustomerRelationshipError(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return repr(self.value)
 
 def lambda_handler(event, context):
-    print event
-    if(event['relationship'] == 'follow'):
-        if(event['operation'] == 'create'):
-            createFollowRelationship(event['own_email'],event['target_email'])
-        elif(event['operation'] == 'get'):
-            data = getFollowRelationshipTargets(event['own_email'])
-            return data
-    elif(event['relationship'] == 'like'):
-        if(event['operation'] == 'create'):
-            createLikeRelationship(event['own_email'], event['target_UUID'], event['target_type'])
-        elif(event['operation'] == 'get'):
-            data = getLikeRelationshipTargets(event['own_email'], event['target_type'])
-            return data
 
+    try:
+        event = json.loads(event['Records'][0]['Sns']['Message'])
+        print event
+        global resultKey
+        resultKey = event['res_key']
+        
+        if(event['relationship'] == 'follow'):
+            if(event['operation'] == 'create'):
+                createFollowRelationship(event['own_email'],event['target_email'])
+            elif(event['operation'] == 'get'):
+                data = getFollowRelationshipTargets(event['own_email'])
+                putResult(data)
+        elif(event['relationship'] == 'like'):
+            if(event['operation'] == 'create'):
+                createLikeRelationship(event['own_email'], event['target_UUID'], event['target_type'])
+            elif(event['operation'] == 'get'):
+                data = getLikeRelationshipTargets(event['own_email'], event['target_type'])
+                putResult(data)
+        else:
+            raise CustomerRelationshipError("400 Relationship not valid")
+    except CustomerRelationshipError as e:
+        putResult(e.value)
+    except Exception as e:
+        putResult(e.__str__())
+
+
+def putResult(res):
+
+    global resultKey
+    print "wrinting result key={} , result = {}".format(resultKey, res)
+    response = resultTable.put_item(
+        Item={
+            'key' : resultKey ,
+            'result' : json.dumps(res)
+        }
+    )
 
 def checkIDInCustomer(ID):
     payload = {
@@ -27,7 +59,7 @@ def checkIDInCustomer(ID):
             }
     resp = getPayload(invokeLambda("Customer", payload))
     if "errorMessage" in resp:
-        raise ValueError("400 ID not found: {} ({})".format(ID, resp["errorMessage"]))
+        raise CustomerRelationshipError("Error: 400 ID not found: {} ({})".format(ID, resp["errorMessage"]))
 
 def checkIDInComment(ID):
     payload = {
@@ -37,7 +69,7 @@ def checkIDInComment(ID):
             }
     resp = getPayload(invokeLambda("Comment", payload))
     if "errorMessage" in resp:
-        raise ValueError("400 ID not found: {} ({})".format(ID, resp["errorMessage"]))
+        raise CustomerRelationshipError("400 ID not found: {} ({})".format(ID, resp["errorMessage"]))
 
 def checkIDInContent(ID):
     payload = {
@@ -47,7 +79,7 @@ def checkIDInContent(ID):
             }
     resp = getPayload(invokeLambda("Content", payload))
     if "errorMessage" in resp:
-        raise ValueError("400 ID not found: {} ({})".format(ID, resp["errorMessage"]))
+        raise CustomerRelationshipError("400 ID not found: {} ({})".format(ID, resp["errorMessage"]))
 
 def createFollowRelationship(ownUUID, targetUUID):
     checkIDInCustomer(ownUUID)
@@ -56,6 +88,8 @@ def createFollowRelationship(ownUUID, targetUUID):
     checkExistOrCreateCustomerInGraph(targetUUID)
 
     addRelationship("follow", ownUUID, targetUUID)
+
+    putResult("follow relationship from {} to {} created succssfully".format(ownUUID, targetUUID))
 
 
 def createLikeRelationship(ownUUID, targetUUID, targetType):
@@ -68,9 +102,10 @@ def createLikeRelationship(ownUUID, targetUUID, targetType):
         checkIDInContent(targetUUID)
         checkExistOrCreateContentInGraph(targetUUID)
     else:
-        raise Exception("400 Invalid request")
+        raise CustomerRelationshipError("400 Invalid request, unknow target type for like relationship")
 
     addRelationship("like", ownUUID, targetUUID)
+    putResult("like relationship from {} to {} created succssfully".format(ownUUID, targetUUID))
 
 def getFollowRelationshipTargets(ownUUID):
     checkIDInCustomer(ownUUID)
@@ -102,7 +137,7 @@ def getRelationshipTargets(UUID, relationshipType, targetType = None):
     if incomingPayload['status'] == 'success':
         return incomingPayload['data']
     else:
-        raise Exception("500 Can not get relationship targets")
+        raise CustomerRelationshipError("404 Can not get relationship targets")
 
 
 def checkExistOrCreateCustomerInGraph(UUID):
@@ -114,6 +149,7 @@ def checkExistOrCreateCustomerInGraph(UUID):
             }
     
     response = invokeNeo4jLambda(payload)
+    print response
     incomingPayload = getPayload(response)
 
     if(incomingPayload['status'] == 'fail'):
@@ -164,7 +200,7 @@ def invokeLambda(func, payload):
 
     status = response['StatusCode']
     if status < 200 or status >299:
-        raise Exception("500 invoking lambda failed")
+        raise CustomerRelationshipError("500 invoking lambda failed")
 
     return response
 
@@ -184,9 +220,9 @@ def createCustomer(UUID):
         response = invokeNeo4jLambda(payload)
         incomingPayload = getPayload(response)
         if(incomingPayload['status'] != 'success'):
-            raise Exception("500 creating customer failed")
+            raise CustomerRelationshipError("500 creating customer failed")
     except:
-        raise Exception("500 creating customer failed")
+        raise CustomerRelationshipError("500 creating customer failed")
 
 def createContent(UUID):
     try:
@@ -201,9 +237,9 @@ def createContent(UUID):
         response = invokeNeo4jLambda(payload)
         incomingPayload = getPayload(response)
         if(incomingPayload['status'] != 'success'):
-            raise Exception("500 creating cotent failed")
+            raise CustomerRelationshipError("500 creating cotent failed")
     except:
-        raise Exception("500 creating content failed")
+        raise CustomerRelationshipError("500 creating content failed")
 
 def createComment(UUID):
     try:
@@ -218,9 +254,9 @@ def createComment(UUID):
         response = invokeNeo4jLambda(payload)
         incomingPayload = getPayload(response)
         if(incomingPayload['status'] != 'success'):
-            raise Exception("500 creating comment failed")
+            raise CustomerRelationshipError("500 creating comment failed")
     except:
-        raise Exception("500 creating comment failed")
+        raise CustomerRelationshipError("500 creating comment failed")
 
 
 def addRelationship(relationshipType, ownUUID, targetUUID):
