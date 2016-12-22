@@ -1,7 +1,21 @@
 import boto3
 import json
+import random
+
 client = boto3.client('lambda')
 
+def generateUUID():
+    totalCharacters = 39 # length of number hash; in this case 0-39 = 40 characters
+    txtUuid = ""
+    while True:
+        point = random.randint(0,9)
+        if len(txtUuid) == 0 and point == 0:
+            while True:
+                point = random.randint(0,9)
+                if point != 0: break
+        txtUuid = txtUuid + str(point)
+        if len(txtUuid) - 1 >= totalCharacters: break
+    return txtUuid
 
 def lambda_handler(event, context):
     print event
@@ -23,11 +37,18 @@ def checkIDInCustomer(ID):
     payload = {
             "operation": "read",
             "tableName": "Customer",
-            "email": ID
+            "email": ID,
+            "res_key": generateUUID()
             }
-    resp = getPayload(invokeLambda("Customer", payload))
-    if "errorMessage" in resp:
-        raise ValueError("400 ID not found: {} ({})".format(ID, resp["errorMessage"]))
+    invokeLambda("Customer", payload)
+    while True:
+        resp = getPayload(invokeLambda("Result", {
+            "tableName": "Result",
+            "key": payload["res_key"]
+        }))
+        if "errorMessage" not in resp: break
+    if "name" in resp and "Item is not found" in resp["name"]:
+        raise ValueError("400 ID not found: {} ({})".format(ID, resp["name"]))
 
 def checkIDInComment(ID):
     payload = {
